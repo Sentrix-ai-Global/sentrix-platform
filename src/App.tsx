@@ -106,29 +106,40 @@ export default function App() {
       display: "flex", flexDirection: "column", height: "100%",
       background: "linear-gradient(180deg, #060e22 0%, #050d1f 100%)",
       borderRight: "1px solid #1a2744",
-      width: mobile ? "100%" : "240px",
+      width: mobile ? "100%" : "260px",
     }}>
-      {/* Logo grande */}
+      {/* Logo grande e impactante */}
       <div style={{
-        padding: "16px 12px 12px",
+        padding: "24px 16px 16px",
         borderBottom: "1px solid #1a2744",
         display: "flex", flexDirection: "column", alignItems: "center",
-        background: "linear-gradient(180deg, rgba(6,182,212,0.03) 0%, transparent 100%)",
+        background: "linear-gradient(180deg, rgba(6,182,212,0.06) 0%, transparent 100%)",
+        position: "relative",
       }}>
+        {/* Glow atrás da logo */}
+        <div style={{
+          position: "absolute", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 180, height: 180,
+          background: "radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
         <img
           src="/logo.png"
           alt="SENTRIX"
           style={{
             width: "100%",
-            maxWidth: 200,
+            maxWidth: 220,
             height: "auto",
             objectFit: "contain",
-            filter: "drop-shadow(0 0 12px rgba(6,182,212,0.3))",
+            filter: "drop-shadow(0 0 16px rgba(6,182,212,0.5)) drop-shadow(0 0 32px rgba(6,182,212,0.2))",
+            position: "relative",
+            zIndex: 1,
           }}
         />
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-          <span style={{ width: 6, height: 6, background: "#22c55e", borderRadius: "50%", animation: "pulse 2s infinite", flexShrink: 0 }} />
-          <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 700, letterSpacing: "0.15em" }}>{t.systemActive}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, zIndex: 1 }}>
+          <span style={{ width: 7, height: 7, background: "#22c55e", borderRadius: "50%", animation: "pulse 2s infinite", flexShrink: 0 }} />
+          <span style={{ fontSize: 10, color: "#22c55e", fontWeight: 700, letterSpacing: "0.2em" }}>{t.systemActive}</span>
         </div>
       </div>
 
@@ -173,8 +184,8 @@ export default function App() {
           {(["pt", "en", "es"] as Lang[]).map(l => (
             <button key={l} onClick={() => setLang(l)}
               style={{
-                flex: 1, padding: "6px 0", borderRadius: 6, border: "none",
-                cursor: "pointer", fontSize: 10, fontWeight: 900,
+                flex: 1, padding: "7px 0", borderRadius: 6, border: "none",
+                cursor: "pointer", fontSize: 11, fontWeight: 900,
                 textTransform: "uppercase", letterSpacing: "0.1em",
                 background: lang === l ? "rgba(249,115,22,0.2)" : "transparent",
                 color: lang === l ? "#f97316" : "#2a3a54",
@@ -190,17 +201,17 @@ export default function App() {
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", background: "#050d1f", overflow: "hidden" }}>
 
-      {/* Background */}
+      {/* Background grid */}
       <div style={{
         position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
         backgroundImage: "linear-gradient(rgba(249,115,22,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.025) 1px, transparent 1px)",
         backgroundSize: "50px 50px",
       }} />
-      <div style={{ position: "fixed", top: -100, left: -100, width: 500, height: 500, background: "radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: -100, right: -100, width: 500, height: 500, background: "radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", top: -150, left: -150, width: 600, height: 600, background: "radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", bottom: -150, right: -150, width: 600, height: 600, background: "radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
 
       {/* Desktop Sidebar */}
-      <aside style={{ flexShrink: 0, zIndex: 10, width: 240 }} className="desktop-only">
+      <aside style={{ flexShrink: 0, zIndex: 10, width: 260 }} className="desktop-only">
         <Sidebar />
       </aside>
 
@@ -208,7 +219,7 @@ export default function App() {
       {menuOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex" }}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.85)" }} onClick={() => setMenuOpen(false)} />
-          <div style={{ position: "relative", width: 260, zIndex: 51 }}>
+          <div style={{ position: "relative", width: 280, zIndex: 51 }}>
             <button onClick={() => setMenuOpen(false)} style={{
               position: "absolute", top: 12, right: 12, zIndex: 52,
               background: "none", border: "none", color: "#4a6080", cursor: "pointer"
@@ -226,7 +237,7 @@ export default function App() {
         {/* Header */}
         <header style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "0 20px", height: 52, flexShrink: 0,
+          padding: "0 24px", height: 54, flexShrink: 0,
           background: "rgba(6,14,34,0.95)", borderBottom: "1px solid #1a2744",
           backdropFilter: "blur(20px)",
         }}>
@@ -247,8 +258,8 @@ export default function App() {
               <Bell size={16} />
               <span style={{ position: "absolute", top: 4, right: 4, width: 6, height: 6, background: "#ef4444", borderRadius: "50%" }} />
             </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", background: "#0a1628", border: "1px solid #1a2744", borderRadius: 8 }}>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", background: "linear-gradient(135deg, #f97316, #ea580c)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 14px", background: "#0a1628", border: "1px solid #1a2744", borderRadius: 8 }}>
+              <div style={{ width: 22, height: 22, borderRadius: "50%", background: "linear-gradient(135deg, #f97316, #ea580c)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: 7, fontWeight: 900, color: "white" }}>OP</span>
               </div>
               <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8" }}>{t.operator}</span>
@@ -271,10 +282,10 @@ export default function App() {
               </div>
 
               {/* Stats */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
                 {statCards.map(({ icon: Icon, label, value, color, pulse }) => (
                   <div key={label} style={{
-                    padding: 16, borderRadius: 12,
+                    padding: 18, borderRadius: 12,
                     background: "linear-gradient(135deg, #0a1628, #060e22)",
                     border: "1px solid #1a2744", cursor: "default",
                     transition: "border-color 0.2s, transform 0.2s",
@@ -284,12 +295,12 @@ export default function App() {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
                       <div style={{ padding: 8, borderRadius: 8, background: color + "15", border: `1px solid ${color}25` }}>
-                        <Icon size={14} color={color} />
+                        <Icon size={15} color={color} />
                       </div>
                       {pulse && <span style={{ width: 8, height: 8, background: "#ef4444", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />}
                     </div>
-                    <p style={{ fontSize: 22, fontWeight: 900, color, fontFamily: "monospace", margin: 0, lineHeight: 1 }}>{value}</p>
-                    <p style={{ fontSize: 9, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.12em", marginTop: 4 }}>{label}</p>
+                    <p style={{ fontSize: 24, fontWeight: 900, color, fontFamily: "monospace", margin: 0, lineHeight: 1 }}>{value}</p>
+                    <p style={{ fontSize: 9, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.12em", marginTop: 6 }}>{label}</p>
                   </div>
                 ))}
               </div>
@@ -297,7 +308,7 @@ export default function App() {
               {/* Quick Actions */}
               <div>
                 <p style={{ fontSize: 9, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 12, fontWeight: 700 }}>{t.actions}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 8 }}>
                   {[
                     { icon: Zap, label: t.emitAlert, color: "#ef4444" },
                     { icon: Users, label: t.dispatch, color: "#f97316" },
@@ -307,16 +318,16 @@ export default function App() {
                     { icon: FileText, label: t.report, color: "#8b5cf6" },
                   ].map(({ icon: Icon, label, color }) => (
                     <button key={label} style={{
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                      padding: "12px 8px", borderRadius: 10,
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                      padding: "14px 8px", borderRadius: 10,
                       background: color + "0d", border: `1px solid ${color}25`,
                       color, cursor: "pointer", transition: "all 0.15s",
                     }}
-                      onMouseEnter={e => { e.currentTarget.style.background = color + "20"; e.currentTarget.style.transform = "scale(1.03)"; }}
+                      onMouseEnter={e => { e.currentTarget.style.background = color + "20"; e.currentTarget.style.transform = "scale(1.04)"; }}
                       onMouseLeave={e => { e.currentTarget.style.background = color + "0d"; e.currentTarget.style.transform = "scale(1)"; }}
                     >
-                      <Icon size={16} />
-                      <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center", lineHeight: 1.2 }}>{label}</span>
+                      <Icon size={18} />
+                      <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center", lineHeight: 1.3 }}>{label}</span>
                     </button>
                   ))}
                 </div>
@@ -324,13 +335,13 @@ export default function App() {
 
               {/* Map placeholder */}
               <div style={{
-                padding: 24, borderRadius: 12,
+                padding: 32, borderRadius: 12,
                 background: "linear-gradient(135deg, #0a1628, #060e22)",
                 border: "1px solid #1a2744", textAlign: "center",
-                minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center",
-                flexDirection: "column", gap: 8,
+                minHeight: 220, display: "flex", alignItems: "center", justifyContent: "center",
+                flexDirection: "column", gap: 10,
               }}>
-                <Globe size={32} color="#1a2744" />
+                <Globe size={40} color="#1a2744" />
                 <p style={{ color: "#2a3a54", fontSize: 11, fontFamily: "monospace" }}>
                   🛰 SENTRIX MAP ENGINE — {lang === "pt" ? "Módulos em construção" : lang === "en" ? "Modules under construction" : "Módulos en construcción"}
                 </p>
@@ -341,8 +352,8 @@ export default function App() {
 
           {module !== "dashboard" && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 16 }}>
-              <div style={{ padding: 24, borderRadius: 16, background: "#0a1628", border: "1px solid #1a2744", textAlign: "center" }}>
-                <p style={{ color: "#f97316", fontWeight: 900, fontSize: 14, letterSpacing: "0.1em", marginBottom: 8 }}>
+              <div style={{ padding: 32, borderRadius: 16, background: "#0a1628", border: "1px solid #1a2744", textAlign: "center", maxWidth: 400 }}>
+                <p style={{ color: "#f97316", fontWeight: 900, fontSize: 16, letterSpacing: "0.1em", marginBottom: 10 }}>
                   {nav.find(n => n.id === module)?.label}
                 </p>
                 <p style={{ color: "#2a3a54", fontSize: 11, fontFamily: "monospace" }}>
@@ -355,7 +366,7 @@ export default function App() {
 
         {/* Footer */}
         <footer style={{
-          padding: "8px 20px", borderTop: "1px solid #1a2744",
+          padding: "8px 24px", borderTop: "1px solid #1a2744",
           background: "rgba(6,14,34,0.95)", flexShrink: 0,
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
@@ -364,7 +375,7 @@ export default function App() {
             <span style={{ color: "#1a2744" }}>•</span>
             <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 700 }}>{t.systemActive}</span>
           </div>
-          <span style={{ fontSize: 9, color: "#1a2744", fontFamily: "monospace" }}>MVP — INTELLIGENT GLOBAL RISK MANAGEMENT</span>
+          <span style={{ fontSize: 9, color: "#1a2744", fontFamily: "monospace" }}>INTELLIGENT GLOBAL RISK MANAGEMENT</span>
         </footer>
       </div>
 
