@@ -1,4 +1,4 @@
-export type Lang = "pt" | "en" | "es";
+import type { Lang } from "../types";
 
 export const T: Record<Lang, any> = {
   pt: {
@@ -172,7 +172,7 @@ export const T: Record<Lang, any> = {
         { name: "Inundaciones", icon: "🌊", status: "alert", risk: 72, alerts: 3, areas: 12, updated: "hace 2 min" },
         { name: "Deslizamientos", icon: "⛰️", status: "critical", risk: 85, alerts: 2, areas: 5, updated: "hace 5 min" },
         { name: "Incendios", icon: "🔥", status: "safe", risk: 23, alerts: 0, areas: 0, updated: "hace 10 min" },
-        { name: "Sequías Extremas", icon: "☀️", status: "monitoring", risk: 45, alerts: 1, updated: "hace 1h" },
+        { name: "Sequías Extremas", icon: "☀️", status: "monitoring", risk: 45, alerts: 1, areas: 8, updated: "hace 1h" },
         { name: "Tormentas Severas", icon: "⛈️", status: "alert", risk: 68, alerts: 2, areas: 15, updated: "hace 8 min" },
         { name: "Terremotos", icon: "🌍", status: "safe", risk: 8, alerts: 0, areas: 0, updated: "hace 30 min" },
       ]

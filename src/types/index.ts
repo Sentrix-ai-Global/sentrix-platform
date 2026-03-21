@@ -1,3 +1,4 @@
+export type Lang = "pt" | "en" | "es";
 export type RiskLevel = "critical" | "high" | "medium" | "low";
 export type DisasterStatus = "critical" | "alert" | "monitoring" | "safe";
 export type AlertStatus = "sent" | "pending" | "scheduled";
