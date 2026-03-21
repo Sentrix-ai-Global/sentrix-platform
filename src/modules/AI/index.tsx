@@ -1,7 +1,7 @@
 import { Brain, Target, Bell, Clock, MapPin, ChevronRight, Cpu } from "lucide-react";
-import { Lang } from "../../types";
+import type { Lang, RiskLevel } from "../../types";
+import { levelConfig } from "../../types";
 import { T } from "../../i18n/translations";
-import { levelConfig, RiskLevel } from "../../types";
 
 interface AIProps {
   lang: Lang;
@@ -19,8 +19,6 @@ export default function AIPredictive({ lang }: AIProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
-      {/* Header */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
           <div style={{ width: 4, height: 36, background: "linear-gradient(180deg, #8b5cf6, #06b6d4)", borderRadius: 2 }} />
@@ -28,8 +26,6 @@ export default function AIPredictive({ lang }: AIProps) {
         </div>
         <p style={{ fontSize: 13, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.1em", marginLeft: 16 }}>{ai.subtitle}</p>
       </div>
-
-      {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
         {statsCards.map(({ icon: Icon, label, value, color }) => (
           <div key={label}
@@ -45,17 +41,13 @@ export default function AIPredictive({ lang }: AIProps) {
           </div>
         ))}
       </div>
-
-      {/* Model status bar */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12 }}>
         <Cpu size={16} color="#8b5cf6" />
         <span style={{ fontSize: 13, color: "#8b5cf6", fontWeight: 700 }}>{ai.modelActive}: SENTRIX-AI v4.0</span>
         <span style={{ marginLeft: "auto", fontSize: 12, color: "#2a3a54", fontFamily: "monospace" }}>{ai.lastUpdate}: 2 min</span>
       </div>
-
-      {/* Events list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {ai.events.map((event, i) => {
+        {ai.events.map((event: any, i: number) => {
           const cfg = levelConfig[event.level as RiskLevel];
           const levelLabel = ai[event.level as keyof typeof ai] as string;
           return (
@@ -75,8 +67,6 @@ export default function AIPredictive({ lang }: AIProps) {
                   </div>
                   <span style={{ padding: "5px 12px", borderRadius: 20, fontSize: 12, fontWeight: 900, background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>{levelLabel}</span>
                 </div>
-
-                {/* Progress bars */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
                   {[
                     { label: ai.probability, value: event.probability, color: cfg.color },
@@ -93,24 +83,18 @@ export default function AIPredictive({ lang }: AIProps) {
                     </div>
                   ))}
                 </div>
-
-                {/* Window */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   <Clock size={12} color="#4a6080" />
                   <span style={{ fontSize: 13, color: "#4a6080" }}>{ai.window_label}: <strong style={{ color: "#94a3b8" }}>{event.window}</strong></span>
                 </div>
-
-                {/* Factors */}
                 <div style={{ marginBottom: 12 }}>
                   <p style={{ fontSize: 12, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 700 }}>{ai.factors}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                    {event.factors.map((f, j) => (
+                    {event.factors.map((f: string, j: number) => (
                       <span key={j} style={{ padding: "4px 10px", borderRadius: 6, fontSize: 12, background: "rgba(255,255,255,0.04)", border: "1px solid #1a2744", color: "#6a8099" }}>{f}</span>
                     ))}
                   </div>
                 </div>
-
-                {/* Recommendation */}
                 <div style={{ padding: "10px 14px", borderRadius: 10, background: cfg.bg, border: `1px solid ${cfg.border}`, display: "flex", alignItems: "center", gap: 8 }}>
                   <ChevronRight size={14} color={cfg.color} />
                   <span style={{ fontSize: 13, color: cfg.color, fontWeight: 600 }}>{ai.recommendation}: {event.recommendation}</span>

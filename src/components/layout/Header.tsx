@@ -1,5 +1,5 @@
 import { Bell, Menu } from "lucide-react";
-import { Lang } from "../../types";
+import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
 
 interface HeaderProps {
@@ -18,11 +18,7 @@ export default function Header({ lang, onMenuOpen }: HeaderProps) {
       backdropFilter: "blur(20px)"
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <button
-          onClick={onMenuOpen}
-          className="mobile-only"
-          style={{ background: "none", border: "none", color: "#4a6080", cursor: "pointer", padding: 4 }}
-        >
+        <button onClick={onMenuOpen} className="mobile-only" style={{ background: "none", border: "none", color: "#4a6080", cursor: "pointer", padding: 4 }}>
           <Menu size={22} />
         </button>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }} className="desktop-only">
@@ -32,7 +28,6 @@ export default function Header({ lang, onMenuOpen }: HeaderProps) {
           <span style={{ fontSize: 13, color: "#2a3a54", fontFamily: "monospace" }}>{t.model}</span>
         </div>
       </div>
-
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <button style={{ position: "relative", background: "none", border: "none", color: "#4a6080", cursor: "pointer", padding: 6 }}>
           <Bell size={18} />

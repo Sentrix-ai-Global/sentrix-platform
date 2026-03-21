@@ -1,7 +1,7 @@
 import { CheckCircle, Clock, Users, MapPin, Send } from "lucide-react";
-import { Lang } from "../../types";
+import type { Lang, RiskLevel } from "../../types";
+import { levelConfig } from "../../types";
 import { T } from "../../i18n/translations";
-import { levelConfig, RiskLevel } from "../../types";
 
 interface AlertsProps {
   lang: Lang;
@@ -19,8 +19,6 @@ export default function AlertSystem({ lang }: AlertsProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
-      {/* Header */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
           <div style={{ width: 4, height: 36, background: "linear-gradient(180deg, #ef4444, #f97316)", borderRadius: 2 }} />
@@ -28,8 +26,6 @@ export default function AlertSystem({ lang }: AlertsProps) {
         </div>
         <p style={{ fontSize: 13, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.1em", marginLeft: 16 }}>{al.subtitle}</p>
       </div>
-
-      {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14 }}>
         {statsCards.map(({ label, value, color, icon: Icon }) => (
           <div key={label}
@@ -45,8 +41,6 @@ export default function AlertSystem({ lang }: AlertsProps) {
           </div>
         ))}
       </div>
-
-      {/* New Alert button */}
       <button
         style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "14px 24px", borderRadius: 12, background: "linear-gradient(135deg, #ef4444, #dc2626)", border: "none", color: "white", fontSize: 14, fontWeight: 900, cursor: "pointer", letterSpacing: "0.08em", transition: "all 0.2s" }}
         onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.02)"; e.currentTarget.style.boxShadow = "0 0 24px rgba(239,68,68,0.4)"; }}
@@ -55,10 +49,8 @@ export default function AlertSystem({ lang }: AlertsProps) {
         <Send size={18} />
         {al.newAlert}
       </button>
-
-      {/* Alerts list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {al.alerts.map((alert, i) => {
+        {al.alerts.map((alert: any, i: number) => {
           const cfg = levelConfig[alert.level as RiskLevel];
           return (
             <div key={i} style={{ padding: 22, borderRadius: 14, background: "linear-gradient(135deg, #0a1628, #060e22)", border: `1px solid ${cfg.border}`, position: "relative", overflow: "hidden" }}>
@@ -83,7 +75,6 @@ export default function AlertSystem({ lang }: AlertsProps) {
                     <p style={{ fontSize: 13, color: "#94a3b8", margin: 0, lineHeight: 1.5 }}>{alert.message}</p>
                   </div>
                 </div>
-
                 <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", marginTop: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <MapPin size={12} color="#4a6080" />
@@ -94,13 +85,12 @@ export default function AlertSystem({ lang }: AlertsProps) {
                     <span style={{ fontSize: 13, color: "#4a6080" }}>{alert.reach.toLocaleString()}</span>
                   </div>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {alert.channels.map((ch, j) => (
+                    {alert.channels.map((ch: string, j: number) => (
                       <span key={j} style={{ padding: "2px 8px", borderRadius: 6, fontSize: 12, background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", color: "#6a8099" }}>{ch}</span>
                     ))}
                   </div>
                   <span style={{ marginLeft: "auto", fontSize: 12, color: "#2a3a54", fontFamily: "monospace" }}>{alert.time}</span>
                 </div>
-
                 {alert.status === "pending" && (
                   <button
                     style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 8, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all 0.15s" }}

@@ -1,5 +1,5 @@
 import { Globe, AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap } from "lucide-react";
-import { Lang } from "../../types";
+import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
 
 interface DashboardProps {
@@ -29,15 +29,11 @@ export default function Dashboard({ lang }: DashboardProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-
-      {/* Hero logo */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", background: "linear-gradient(135deg, #0a1628, #060e22)", borderRadius: 16, border: "1px solid #1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, height: 300, background: "radial-gradient(ellipse, rgba(6,182,212,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
         <img src="/logo.png" alt="SENTRIX" style={{ width: "100%", maxWidth: 480, height: "auto", filter: "drop-shadow(0 0 24px rgba(6,182,212,0.6)) drop-shadow(0 0 48px rgba(6,182,212,0.2))", position: "relative", zIndex: 1 }} />
         <p style={{ fontSize: 13, color: "#2a3a54", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "monospace", marginTop: 16, zIndex: 1 }}>{t.subtitle}</p>
       </div>
-
-      {/* Stats grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14 }}>
         {statCards.map(({ icon: Icon, label, value, color, pulse }) => (
           <div key={label}
@@ -56,8 +52,6 @@ export default function Dashboard({ lang }: DashboardProps) {
           </div>
         ))}
       </div>
-
-      {/* Quick actions */}
       <div>
         <p style={{ fontSize: 13, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 14, fontWeight: 700 }}>{t.actions}</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 10 }}>
@@ -73,13 +67,10 @@ export default function Dashboard({ lang }: DashboardProps) {
           ))}
         </div>
       </div>
-
-      {/* Map placeholder */}
       <div style={{ padding: 32, borderRadius: 14, background: "linear-gradient(135deg, #0a1628, #060e22)", border: "1px solid #1a2744", textAlign: "center", minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
         <Globe size={44} color="#1a2744" />
         <p style={{ fontSize: 13, color: "#2a3a54", fontFamily: "monospace" }}>🛰 SENTRIX MAP ENGINE – {t.building}</p>
       </div>
-
     </div>
   );
 }

@@ -11,7 +11,7 @@ import AlertSystem  from "./modules/Alerts";
 import Disasters    from "./modules/Disasters";
 import Placeholder  from "./modules/Placeholder";
 
-import { Lang } from "./types";
+import type { Lang } from "./types";
 
 export default function App() {
   const [lang, setLang]         = useState<Lang>("pt");
@@ -30,16 +30,10 @@ export default function App() {
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", background: "#050d1f", overflow: "hidden" }}>
-
-      {/* Background grid */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, backgroundImage: "linear-gradient(rgba(249,115,22,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.025) 1px, transparent 1px)", backgroundSize: "50px 50px" }} />
-
-      {/* Desktop sidebar */}
       <aside style={{ flexShrink: 0, zIndex: 10, width: 220 }} className="desktop-only">
         <Sidebar lang={lang} setLang={setLang} module={module} setModule={setModule} />
       </aside>
-
-      {/* Mobile sidebar overlay */}
       {menuOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex" }}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.85)" }} onClick={() => setMenuOpen(false)} />
@@ -51,8 +45,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* Main content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 10, minWidth: 0 }}>
         <Header lang={lang} onMenuOpen={() => setMenuOpen(true)} />
         <main style={{ flex: 1, overflow: "auto", padding: "24px" }}>
@@ -60,7 +52,6 @@ export default function App() {
         </main>
         <Footer lang={lang} />
       </div>
-
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         .desktop-only { display: flex !important; }

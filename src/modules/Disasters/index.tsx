@@ -1,6 +1,6 @@
-import { Lang } from "../../types";
+import type { Lang, DisasterStatus } from "../../types";
+import { statusConfig } from "../../types";
 import { T } from "../../i18n/translations";
-import { statusConfig, DisasterStatus } from "../../types";
 
 interface DisastersProps {
   lang: Lang;
@@ -12,8 +12,6 @@ export default function Disasters({ lang }: DisastersProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
-      {/* Header */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
           <div style={{ width: 4, height: 36, background: "linear-gradient(180deg, #f97316, #ef4444)", borderRadius: 2 }} />
@@ -21,10 +19,8 @@ export default function Disasters({ lang }: DisastersProps) {
         </div>
         <p style={{ fontSize: 13, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.1em", marginLeft: 16 }}>{d.subtitle}</p>
       </div>
-
-      {/* Cards grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
-        {d.types.map((type, i) => {
+        {d.types.map((type: any, i: number) => {
           const sc = statusConfig[type.status as DisasterStatus];
           const sl = statusLabel[type.status as keyof typeof statusLabel];
           return (
@@ -33,7 +29,6 @@ export default function Disasters({ lang }: DisastersProps) {
               onMouseEnter={e => { e.currentTarget.style.borderColor = sc.color + "60"; e.currentTarget.style.transform = "translateY(-2px)"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = sc.color + "30"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
-              {/* Title row */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 24 }}>{type.icon}</span>
@@ -41,8 +36,6 @@ export default function Disasters({ lang }: DisastersProps) {
                 </div>
                 <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 900, background: sc.color + "20", color: sc.color, border: `1px solid ${sc.color}40` }}>{sl}</span>
               </div>
-
-              {/* Risk bar */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                   <span style={{ fontSize: 12, color: "#4a6080", fontWeight: 700, textTransform: "uppercase" }}>{d.riskLevel}</span>
@@ -52,8 +45,6 @@ export default function Disasters({ lang }: DisastersProps) {
                   <div style={{ height: "100%", width: `${type.risk}%`, background: `linear-gradient(90deg, ${sc.color}, ${sc.color}99)`, borderRadius: 3 }} />
                 </div>
               </div>
-
-              {/* Footer stats */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ display: "flex", gap: 16 }}>
                   <div>
