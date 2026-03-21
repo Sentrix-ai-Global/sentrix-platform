@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Menu, X, MapPin, Users, TrendingUp, Zap, Activity, Bell } from "lucide-react";
+import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Menu, X, MapPin, Users, TrendingUp, Zap, Activity, Bell, Shield } from "lucide-react";
 
 type Lang = "pt" | "en" | "es";
 
@@ -7,10 +7,8 @@ const T = {
   pt: {
     title: "PAINEL CENTRAL DE COMANDO",
     subtitle: "Monitoramento preditivo em tempo real • Estado de São Paulo",
-    systemActive: "SISTEMA ATIVO",
-    model: "MODELO IA v4.0",
-    operator: "Operador",
-    defense: "Defesa Civil SP",
+    systemActive: "SISTEMA ATIVO", model: "MODELO IA v4.0",
+    operator: "Operador", defense: "Defesa Civil SP",
     alerts: "ALERTAS ATIVOS", areas: "ÁREAS MONITORADAS",
     sensors: "SENSORES ONLINE", teams: "EQUIPES EM CAMPO",
     lives: "VIDAS PROTEGIDAS", damage: "PREJUÍZO EVITADO",
@@ -30,10 +28,8 @@ const T = {
   en: {
     title: "CENTRAL COMMAND PANEL",
     subtitle: "Real-time predictive monitoring • State of São Paulo",
-    systemActive: "SYSTEM ACTIVE",
-    model: "AI MODEL v4.0",
-    operator: "Operator",
-    defense: "Civil Defense SP",
+    systemActive: "SYSTEM ACTIVE", model: "AI MODEL v4.0",
+    operator: "Operator", defense: "Civil Defense SP",
     alerts: "ACTIVE ALERTS", areas: "MONITORED AREAS",
     sensors: "SENSORS ONLINE", teams: "TEAMS IN FIELD",
     lives: "LIVES PROTECTED", damage: "DAMAGE AVOIDED",
@@ -53,10 +49,8 @@ const T = {
   es: {
     title: "PANEL CENTRAL DE COMANDO",
     subtitle: "Monitoreo predictivo en tiempo real • Estado de São Paulo",
-    systemActive: "SISTEMA ACTIVO",
-    model: "MODELO IA v4.0",
-    operator: "Operador",
-    defense: "Defensa Civil SP",
+    systemActive: "SISTEMA ACTIVO", model: "MODELO IA v4.0",
+    operator: "Operador", defense: "Defensa Civil SP",
     alerts: "ALERTAS ACTIVAS", areas: "ÁREAS MONITOREADAS",
     sensors: "SENSORES EN LÍNEA", teams: "EQUIPOS EN CAMPO",
     lives: "VIDAS PROTEGIDAS", damage: "DAÑO EVITADO",
@@ -107,46 +101,46 @@ export default function App() {
   const nav = navItems(t);
   const statCards = stats(t);
 
-  const Sidebar = ({ mobile = false }) => (
+  const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div style={{
       display: "flex", flexDirection: "column", height: "100%",
       background: "linear-gradient(180deg, #060e22 0%, #050d1f 100%)",
       borderRight: "1px solid #1a2744",
       width: mobile ? "100%" : "240px",
     }}>
-      {/* Logo */}
-      <div style={{ padding: "20px 16px", borderBottom: "1px solid #1a2744" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: "linear-gradient(135deg, #f97316, #ea580c)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 0 20px rgba(249,115,22,0.4)",
-            position: "relative", flexShrink: 0,
-          }}>
-            <Shield size={18} color="white" />
-            <span style={{
-              position: "absolute", top: -2, right: -2,
-              width: 10, height: 10, background: "#22c55e",
-              borderRadius: "50%", border: "2px solid #050d1f",
-            }} />
-          </div>
-          <div>
-            <p style={{ fontWeight: 900, fontSize: 13, color: "#fff", letterSpacing: "0.2em" }}>SENTRIX</p>
-            <p style={{ fontSize: 9, color: "#f97316", letterSpacing: "0.15em", opacity: 0.7 }}>INTELLIGENCE</p>
-          </div>
+      {/* Logo grande */}
+      <div style={{
+        padding: "16px 12px 12px",
+        borderBottom: "1px solid #1a2744",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        background: "linear-gradient(180deg, rgba(6,182,212,0.03) 0%, transparent 100%)",
+      }}>
+        <img
+          src="/logo.png"
+          alt="SENTRIX"
+          style={{
+            width: "100%",
+            maxWidth: 200,
+            height: "auto",
+            objectFit: "contain",
+            filter: "drop-shadow(0 0 12px rgba(6,182,212,0.3))",
+          }}
+        />
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+          <span style={{ width: 6, height: 6, background: "#22c55e", borderRadius: "50%", animation: "pulse 2s infinite", flexShrink: 0 }} />
+          <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 700, letterSpacing: "0.15em" }}>{t.systemActive}</span>
         </div>
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
+      <nav style={{ flex: 1, padding: "10px 8px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
         {nav.map(({ id, label, icon: Icon, badge }) => {
           const active = module === id;
           return (
             <button key={id} onClick={() => { setModule(id); setMenuOpen(false); }}
               style={{
                 display: "flex", alignItems: "center", gap: 10,
-                padding: "10px 12px", borderRadius: 8, border: "none",
+                padding: "9px 12px", borderRadius: 8, border: "none",
                 cursor: "pointer", width: "100%", textAlign: "left",
                 background: active ? "rgba(249,115,22,0.12)" : "transparent",
                 borderLeft: active ? "2px solid #f97316" : "2px solid transparent",
@@ -173,9 +167,9 @@ export default function App() {
         })}
       </nav>
 
-      {/* Lang + Status */}
-      <div style={{ padding: "12px 8px", borderTop: "1px solid #1a2744" }}>
-        <div style={{ display: "flex", gap: 4, padding: 4, background: "#0a1628", borderRadius: 8, border: "1px solid #1a2744", marginBottom: 10 }}>
+      {/* Lang */}
+      <div style={{ padding: "10px 8px", borderTop: "1px solid #1a2744" }}>
+        <div style={{ display: "flex", gap: 4, padding: 4, background: "#0a1628", borderRadius: 8, border: "1px solid #1a2744" }}>
           {(["pt", "en", "es"] as Lang[]).map(l => (
             <button key={l} onClick={() => setLang(l)}
               style={{
@@ -189,10 +183,6 @@ export default function App() {
             >{l}</button>
           ))}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4 }}>
-          <span style={{ width: 6, height: 6, background: "#22c55e", borderRadius: "50%", animation: "pulse 2s infinite" }} />
-          <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 700, letterSpacing: "0.1em" }}>{t.systemActive}</span>
-        </div>
       </div>
     </div>
   );
@@ -200,33 +190,31 @@ export default function App() {
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", background: "#050d1f", overflow: "hidden" }}>
 
-      {/* Grid background */}
+      {/* Background */}
       <div style={{
         position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
-        backgroundImage: "linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px)",
+        backgroundImage: "linear-gradient(rgba(249,115,22,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.025) 1px, transparent 1px)",
         backgroundSize: "50px 50px",
       }} />
-      <div style={{ position: "fixed", top: -100, left: -100, width: 400, height: 400, background: "radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: -100, right: -100, width: 400, height: 400, background: "radial-gradient(circle, rgba(6,182,212,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", top: -100, left: -100, width: 500, height: 500, background: "radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", bottom: -100, right: -100, width: 500, height: 500, background: "radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
 
       {/* Desktop Sidebar */}
-      <div style={{ flexShrink: 0, zIndex: 10, display: "none" }} className="md-sidebar">
-        <Sidebar />
-      </div>
       <aside style={{ flexShrink: 0, zIndex: 10, width: 240 }} className="desktop-only">
         <Sidebar />
       </aside>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile overlay */}
       {menuOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex" }}>
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)" }} onClick={() => setMenuOpen(false)} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.85)" }} onClick={() => setMenuOpen(false)} />
           <div style={{ position: "relative", width: 260, zIndex: 51 }}>
-            <div style={{ position: "absolute", top: 12, right: 12, zIndex: 52 }}>
-              <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", color: "#4a6080", cursor: "pointer" }}>
-                <X size={20} />
-              </button>
-            </div>
+            <button onClick={() => setMenuOpen(false)} style={{
+              position: "absolute", top: 12, right: 12, zIndex: 52,
+              background: "none", border: "none", color: "#4a6080", cursor: "pointer"
+            }}>
+              <X size={20} />
+            </button>
             <Sidebar mobile />
           </div>
         </div>
@@ -248,7 +236,7 @@ export default function App() {
               <Menu size={20} />
             </button>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }} className="desktop-only">
-              <span style={{ width: 6, height: 6, background: "#22c55e", borderRadius: "50%" }} />
+              <span style={{ width: 6, height: 6, background: "#22c55e", borderRadius: "50%", animation: "pulse 2s infinite" }} />
               <span style={{ fontSize: 10, color: "#22c55e", fontWeight: 700, letterSpacing: "0.12em" }}>{t.systemActive}</span>
               <span style={{ color: "#1a2744", margin: "0 8px" }}>|</span>
               <span style={{ fontSize: 10, color: "#2a3a54", fontFamily: "monospace" }}>{t.model}</span>
@@ -274,14 +262,12 @@ export default function App() {
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
               {/* Title */}
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-                    <div style={{ width: 3, height: 32, background: "linear-gradient(180deg, #f97316, #06b6d4)", borderRadius: 2 }} />
-                    <h1 style={{ fontSize: 24, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", margin: 0 }}>{t.title}</h1>
-                  </div>
-                  <p style={{ fontSize: 10, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.12em", marginLeft: 15 }}>{t.subtitle}</p>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+                  <div style={{ width: 3, height: 32, background: "linear-gradient(180deg, #f97316, #06b6d4)", borderRadius: 2 }} />
+                  <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", margin: 0 }}>{t.title}</h1>
                 </div>
+                <p style={{ fontSize: 10, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.12em", marginLeft: 15 }}>{t.subtitle}</p>
               </div>
 
               {/* Stats */}
@@ -290,7 +276,7 @@ export default function App() {
                   <div key={label} style={{
                     padding: 16, borderRadius: 12,
                     background: "linear-gradient(135deg, #0a1628, #060e22)",
-                    border: "1px solid #1a2744",
+                    border: "1px solid #1a2744", cursor: "default",
                     transition: "border-color 0.2s, transform 0.2s",
                   }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = color + "50"; e.currentTarget.style.transform = "translateY(-2px)"; }}
@@ -336,13 +322,15 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Coming soon modules */}
+              {/* Map placeholder */}
               <div style={{
-                padding: 20, borderRadius: 12,
+                padding: 24, borderRadius: 12,
                 background: "linear-gradient(135deg, #0a1628, #060e22)",
-                border: "1px solid #1a2744",
-                textAlign: "center",
+                border: "1px solid #1a2744", textAlign: "center",
+                minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center",
+                flexDirection: "column", gap: 8,
               }}>
+                <Globe size={32} color="#1a2744" />
                 <p style={{ color: "#2a3a54", fontSize: 11, fontFamily: "monospace" }}>
                   🛰 SENTRIX MAP ENGINE — {lang === "pt" ? "Módulos em construção" : lang === "en" ? "Modules under construction" : "Módulos en construcción"}
                 </p>
@@ -353,7 +341,7 @@ export default function App() {
 
           {module !== "dashboard" && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 16 }}>
-              <div style={{ padding: 20, borderRadius: 16, background: "#0a1628", border: "1px solid #1a2744", textAlign: "center" }}>
+              <div style={{ padding: 24, borderRadius: 16, background: "#0a1628", border: "1px solid #1a2744", textAlign: "center" }}>
                 <p style={{ color: "#f97316", fontWeight: 900, fontSize: 14, letterSpacing: "0.1em", marginBottom: 8 }}>
                   {nav.find(n => n.id === module)?.label}
                 </p>
@@ -376,7 +364,7 @@ export default function App() {
             <span style={{ color: "#1a2744" }}>•</span>
             <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 700 }}>{t.systemActive}</span>
           </div>
-          <span style={{ fontSize: 9, color: "#1a2744", fontFamily: "monospace" }}>MVP</span>
+          <span style={{ fontSize: 9, color: "#1a2744", fontFamily: "monospace" }}>MVP — INTELLIGENT GLOBAL RISK MANAGEMENT</span>
         </footer>
       </div>
 
