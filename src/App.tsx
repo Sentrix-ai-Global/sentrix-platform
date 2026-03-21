@@ -8,7 +8,7 @@ const T = {
     title: "PAINEL CENTRAL DE COMANDO",
     subtitle: "Monitoramento preditivo em tempo real • Estado de São Paulo",
     systemActive: "SISTEMA ATIVO", model: "MODELO IA v4.0",
-    operator: "Operador", defense: "Defesa Civil SP",
+    operator: "Operador",
     alerts: "ALERTAS ATIVOS", areas: "ÁREAS MONITORADAS",
     sensors: "SENSORES ONLINE", teams: "EQUIPES EM CAMPO",
     lives: "VIDAS PROTEGIDAS", damage: "PREJUÍZO EVITADO",
@@ -16,6 +16,7 @@ const T = {
     emitAlert: "EMITIR ALERTA", dispatch: "DESPACHAR EQUIPE",
     civil: "DEFESA CIVIL", comm: "COMUNICADO",
     checkSensors: "SENSORES", report: "RELATÓRIO",
+    building: "Módulos em construção",
     nav: {
       dashboard: "Painel Central", map: "Mapa Inteligente",
       disasters: "Catástrofes Naturais", urban: "Monitoramento Urbano",
@@ -29,7 +30,7 @@ const T = {
     title: "CENTRAL COMMAND PANEL",
     subtitle: "Real-time predictive monitoring • State of São Paulo",
     systemActive: "SYSTEM ACTIVE", model: "AI MODEL v4.0",
-    operator: "Operator", defense: "Civil Defense SP",
+    operator: "Operator",
     alerts: "ACTIVE ALERTS", areas: "MONITORED AREAS",
     sensors: "SENSORS ONLINE", teams: "TEAMS IN FIELD",
     lives: "LIVES PROTECTED", damage: "DAMAGE AVOIDED",
@@ -37,6 +38,7 @@ const T = {
     emitAlert: "EMIT ALERT", dispatch: "DISPATCH TEAM",
     civil: "CIVIL DEFENSE", comm: "BROADCAST",
     checkSensors: "SENSORS", report: "REPORT",
+    building: "Modules under construction",
     nav: {
       dashboard: "Command Center", map: "Smart Map",
       disasters: "Natural Disasters", urban: "Urban Monitoring",
@@ -50,7 +52,7 @@ const T = {
     title: "PANEL CENTRAL DE COMANDO",
     subtitle: "Monitoreo predictivo en tiempo real • Estado de São Paulo",
     systemActive: "SISTEMA ACTIVO", model: "MODELO IA v4.0",
-    operator: "Operador", defense: "Defensa Civil SP",
+    operator: "Operador",
     alerts: "ALERTAS ACTIVAS", areas: "ÁREAS MONITOREADAS",
     sensors: "SENSORES EN LÍNEA", teams: "EQUIPOS EN CAMPO",
     lives: "VIDAS PROTEGIDAS", damage: "DAÑO EVITADO",
@@ -58,6 +60,7 @@ const T = {
     emitAlert: "EMITIR ALERTA", dispatch: "DESPACHAR EQUIPO",
     civil: "DEFENSA CIVIL", comm: "COMUNICADO",
     checkSensors: "SENSORES", report: "INFORME",
+    building: "Módulos en construcción",
     nav: {
       dashboard: "Panel Central", map: "Mapa Inteligente",
       disasters: "Catástrofes Naturales", urban: "Monitoreo Urbano",
@@ -106,40 +109,21 @@ export default function App() {
       display: "flex", flexDirection: "column", height: "100%",
       background: "linear-gradient(180deg, #060e22 0%, #050d1f 100%)",
       borderRight: "1px solid #1a2744",
-      width: mobile ? "100%" : "260px",
+      width: mobile ? "100%" : "220px",
     }}>
-      {/* Logo grande e impactante */}
+      {/* Logo sidebar pequena */}
       <div style={{
-        padding: "24px 16px 16px",
+        padding: "16px 12px",
         borderBottom: "1px solid #1a2744",
         display: "flex", flexDirection: "column", alignItems: "center",
-        background: "linear-gradient(180deg, rgba(6,182,212,0.06) 0%, transparent 100%)",
-        position: "relative",
       }}>
-        {/* Glow atrás da logo */}
-        <div style={{
-          position: "absolute", top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 180, height: 180,
-          background: "radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)",
-          pointerEvents: "none",
+        <img src="/logo.png" alt="SENTRIX" style={{
+          width: 140, height: "auto",
+          filter: "drop-shadow(0 0 8px rgba(6,182,212,0.4))",
         }} />
-        <img
-          src="/logo.png"
-          alt="SENTRIX"
-          style={{
-            width: "100%",
-            maxWidth: 220,
-            height: "auto",
-            objectFit: "contain",
-            filter: "drop-shadow(0 0 16px rgba(6,182,212,0.5)) drop-shadow(0 0 32px rgba(6,182,212,0.2))",
-            position: "relative",
-            zIndex: 1,
-          }}
-        />
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, zIndex: 1 }}>
-          <span style={{ width: 7, height: 7, background: "#22c55e", borderRadius: "50%", animation: "pulse 2s infinite", flexShrink: 0 }} />
-          <span style={{ fontSize: 10, color: "#22c55e", fontWeight: 700, letterSpacing: "0.2em" }}>{t.systemActive}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+          <span style={{ width: 6, height: 6, background: "#22c55e", borderRadius: "50%", animation: "pulse 2s infinite" }} />
+          <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 700, letterSpacing: "0.15em" }}>{t.systemActive}</span>
         </div>
       </div>
 
@@ -156,8 +140,7 @@ export default function App() {
                 background: active ? "rgba(249,115,22,0.12)" : "transparent",
                 borderLeft: active ? "2px solid #f97316" : "2px solid transparent",
                 color: active ? "#fed7aa" : "#4a6080",
-                transition: "all 0.15s",
-                justifyContent: "space-between",
+                transition: "all 0.15s", justifyContent: "space-between",
               }}
               onMouseEnter={e => { if (!active) e.currentTarget.style.color = "#94a3b8"; }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.color = "#4a6080"; }}
@@ -201,17 +184,17 @@ export default function App() {
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", background: "#050d1f", overflow: "hidden" }}>
 
-      {/* Background grid */}
+      {/* Background */}
       <div style={{
         position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
         backgroundImage: "linear-gradient(rgba(249,115,22,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.025) 1px, transparent 1px)",
         backgroundSize: "50px 50px",
       }} />
-      <div style={{ position: "fixed", top: -150, left: -150, width: 600, height: 600, background: "radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: -150, right: -150, width: 600, height: 600, background: "radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", top: -200, left: -200, width: 700, height: 700, background: "radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", bottom: -200, right: -200, width: 700, height: 700, background: "radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
 
       {/* Desktop Sidebar */}
-      <aside style={{ flexShrink: 0, zIndex: 10, width: 260 }} className="desktop-only">
+      <aside style={{ flexShrink: 0, zIndex: 10, width: 220 }} className="desktop-only">
         <Sidebar />
       </aside>
 
@@ -219,11 +202,8 @@ export default function App() {
       {menuOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex" }}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.85)" }} onClick={() => setMenuOpen(false)} />
-          <div style={{ position: "relative", width: 280, zIndex: 51 }}>
-            <button onClick={() => setMenuOpen(false)} style={{
-              position: "absolute", top: 12, right: 12, zIndex: 52,
-              background: "none", border: "none", color: "#4a6080", cursor: "pointer"
-            }}>
+          <div style={{ position: "relative", width: 260, zIndex: 51 }}>
+            <button onClick={() => setMenuOpen(false)} style={{ position: "absolute", top: 12, right: 12, zIndex: 52, background: "none", border: "none", color: "#4a6080", cursor: "pointer" }}>
               <X size={20} />
             </button>
             <Sidebar mobile />
@@ -272,13 +252,37 @@ export default function App() {
           {module === "dashboard" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-              {/* Title */}
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-                  <div style={{ width: 3, height: 32, background: "linear-gradient(180deg, #f97316, #06b6d4)", borderRadius: 2 }} />
-                  <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", margin: 0 }}>{t.title}</h1>
-                </div>
-                <p style={{ fontSize: 10, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.12em", marginLeft: 15 }}>{t.subtitle}</p>
+              {/* LOGO GRANDE NO CENTRO */}
+              <div style={{
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                padding: "32px 20px 24px",
+                background: "linear-gradient(135deg, #0a1628, #060e22)",
+                borderRadius: 16, border: "1px solid #1a2744",
+                position: "relative", overflow: "hidden",
+              }}>
+                {/* Glow effect */}
+                <div style={{
+                  position: "absolute", top: "50%", left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 400, height: 300,
+                  background: "radial-gradient(ellipse, rgba(6,182,212,0.08) 0%, transparent 70%)",
+                  pointerEvents: "none",
+                }} />
+                <img src="/logo.png" alt="SENTRIX" style={{
+                  width: "100%",
+                  maxWidth: 480,
+                  height: "auto",
+                  objectFit: "contain",
+                  filter: "drop-shadow(0 0 24px rgba(6,182,212,0.6)) drop-shadow(0 0 48px rgba(6,182,212,0.2))",
+                  position: "relative", zIndex: 1,
+                }} />
+                <p style={{
+                  fontSize: 11, color: "#2a3a54", letterSpacing: "0.2em",
+                  textTransform: "uppercase", fontFamily: "monospace",
+                  marginTop: 16, zIndex: 1,
+                }}>
+                  {t.subtitle}
+                </p>
               </div>
 
               {/* Stats */}
@@ -299,7 +303,7 @@ export default function App() {
                       </div>
                       {pulse && <span style={{ width: 8, height: 8, background: "#ef4444", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />}
                     </div>
-                    <p style={{ fontSize: 24, fontWeight: 900, color, fontFamily: "monospace", margin: 0, lineHeight: 1 }}>{value}</p>
+                    <p style={{ fontSize: 26, fontWeight: 900, color, fontFamily: "monospace", margin: 0, lineHeight: 1 }}>{value}</p>
                     <p style={{ fontSize: 9, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.12em", marginTop: 6 }}>{label}</p>
                   </div>
                 ))}
@@ -338,12 +342,12 @@ export default function App() {
                 padding: 32, borderRadius: 12,
                 background: "linear-gradient(135deg, #0a1628, #060e22)",
                 border: "1px solid #1a2744", textAlign: "center",
-                minHeight: 220, display: "flex", alignItems: "center", justifyContent: "center",
+                minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center",
                 flexDirection: "column", gap: 10,
               }}>
                 <Globe size={40} color="#1a2744" />
                 <p style={{ color: "#2a3a54", fontSize: 11, fontFamily: "monospace" }}>
-                  🛰 SENTRIX MAP ENGINE — {lang === "pt" ? "Módulos em construção" : lang === "en" ? "Modules under construction" : "Módulos en construcción"}
+                  🛰 SENTRIX MAP ENGINE — {t.building}
                 </p>
               </div>
 
@@ -352,6 +356,7 @@ export default function App() {
 
           {module !== "dashboard" && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 16 }}>
+              <img src="/logo.png" alt="SENTRIX" style={{ width: 200, opacity: 0.3, filter: "drop-shadow(0 0 12px rgba(6,182,212,0.3))" }} />
               <div style={{ padding: 32, borderRadius: 16, background: "#0a1628", border: "1px solid #1a2744", textAlign: "center", maxWidth: 400 }}>
                 <p style={{ color: "#f97316", fontWeight: 900, fontSize: 16, letterSpacing: "0.1em", marginBottom: 10 }}>
                   {nav.find(n => n.id === module)?.label}
