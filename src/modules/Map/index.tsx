@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye } from "lucide-react";
+import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X } from "lucide-react";
 import type { Lang } from "../../types";
 import L from "leaflet";
 
@@ -15,9 +15,9 @@ interface Location { display_name: string; lat: string; lon: string; place_id: n
 interface Weather { temperature: number; windspeed: number; humidity: number; precipitation: number; weathercode: number; city: string; lat: number; lon: number; }
 
 const labels = {
-  pt: { title: "MAPA INTELIGENTE", subtitle: "Busca precisa • Clique no mapa para dados meteorológicos em tempo real", placeholder: "Digite país, estado, cidade, rua ou endereço completo...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS", lat: "Latitude", lon: "Longitude", noResults: "Nenhum resultado. Tente ser mais específico.", expand: "TELA CHEIA", collapse: "MINIMIZAR", weatherTitle: "DADOS METEOROLÓGICOS EM TEMPO REAL", temp: "Temperatura", wind: "Vento", humidity: "Umidade", rain: "Precipitação", loading: "Carregando dados meteorológicos...", clickHint: "🌍 Clique em qualquer ponto do mapa para ver dados meteorológicos em tempo real" },
-  en: { title: "SMART MAP", subtitle: "Precise search • Click the map for real-time weather data", placeholder: "Type country, state, city, street or full address...", searching: "Searching...", search: "SEARCH", results: "RESULTS", lat: "Latitude", lon: "Longitude", noResults: "No results. Try to be more specific.", expand: "FULL SCREEN", collapse: "MINIMIZE", weatherTitle: "REAL-TIME WEATHER DATA", temp: "Temperature", wind: "Wind", humidity: "Humidity", rain: "Precipitation", loading: "Loading weather data...", clickHint: "🌍 Click anywhere on the map to see real-time weather data" },
-  es: { title: "MAPA INTELIGENTE", subtitle: "Búsqueda precisa • Haz clic en el mapa para datos meteorológicos", placeholder: "Escriba país, estado, ciudad, calle o dirección completa...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS", lat: "Latitud", lon: "Longitud", noResults: "Sin resultados. Intente ser más específico.", expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR", weatherTitle: "DATOS METEOROLÓGICOS EN TIEMPO REAL", temp: "Temperatura", wind: "Viento", humidity: "Humedad", rain: "Precipitación", loading: "Cargando datos meteorológicos...", clickHint: "🌍 Haz clic en cualquier punto del mapa para ver datos meteorológicos en tiempo real" },
+  pt: { title: "MAPA INTELIGENTE", subtitle: "Busca precisa • Clique no mapa para dados meteorológicos em tempo real", placeholder: "Digite país, estado, cidade, rua ou endereço completo...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS", lat: "Lat", lon: "Lon", noResults: "Nenhum resultado. Tente ser mais específico.", expand: "TELA CHEIA", collapse: "MINIMIZAR", weatherTitle: "METEOROLOGIA", temp: "Temp.", wind: "Vento", humidity: "Umidade", rain: "Chuva", loading: "Carregando...", clickHint: "🌍 Clique em qualquer ponto do mapa para ver dados meteorológicos em tempo real" },
+  en: { title: "SMART MAP", subtitle: "Precise search • Click the map for real-time weather data", placeholder: "Type country, state, city, street or full address...", searching: "Searching...", search: "SEARCH", results: "RESULTS", lat: "Lat", lon: "Lon", noResults: "No results. Try to be more specific.", expand: "FULL SCREEN", collapse: "MINIMIZE", weatherTitle: "WEATHER", temp: "Temp.", wind: "Wind", humidity: "Humidity", rain: "Rain", loading: "Loading...", clickHint: "🌍 Click anywhere on the map to see real-time weather data" },
+  es: { title: "MAPA INTELIGENTE", subtitle: "Búsqueda precisa • Haz clic en el mapa para datos meteorológicos", placeholder: "Escriba país, estado, ciudad, calle o dirección completa...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS", lat: "Lat", lon: "Lon", noResults: "Sin resultados. Intente ser más específico.", expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR", weatherTitle: "METEOROLOGÍA", temp: "Temp.", wind: "Viento", humidity: "Humedad", rain: "Lluvia", loading: "Cargando...", clickHint: "🌍 Haz clic en cualquier punto del mapa para ver datos meteorológicos en tiempo real" },
 };
 
 const weatherCodes: Record<number, { label: string; icon: string }> = {
@@ -45,9 +45,11 @@ export default function MapModule({ lang }: MapProps) {
   const [fullscreen, setFullscreen]         = useState(false);
   const [weather, setWeather]               = useState<Weather | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const [showPopup, setShowPopup]           = useState(false);
 
   const fetchWeather = async (lat: number, lon: number, cityName?: string) => {
     setWeatherLoading(true);
+    setShowPopup(true);
     setWeather(null);
     try {
       const res = await fetch(
@@ -64,7 +66,7 @@ export default function MapModule({ lang }: MapProps) {
         city: cityName || `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
         lat, lon,
       });
-    } catch (e) { setWeather(null); }
+    } catch (e) { setShowPopup(false); }
     setWeatherLoading(false);
   };
 
@@ -87,18 +89,16 @@ export default function MapModule({ lang }: MapProps) {
         const { lat, lng } = e.latlng;
         if (clickMarkerRef.current) clickMarkerRef.current.remove();
         const clickIcon = L.divIcon({
-          html: `<div style="width:14px;height:14px;background:#f97316;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(249,115,22,0.8)"></div>`,
+          html: `<div style="width:14px;height:14px;background:#f97316;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(249,115,22,0.9)"></div>`,
           iconSize: [14, 14], iconAnchor: [7, 7], className: ""
         });
         clickMarkerRef.current = L.marker([lat, lng], { icon: clickIcon }).addTo(map);
-
         let cityName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
         try {
           const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
           const geoData = await geo.json();
           cityName = geoData.address?.city || geoData.address?.town || geoData.address?.village || geoData.address?.county || geoData.display_name?.split(",")[0] || cityName;
         } catch (_) {}
-
         fetchWeather(lat, lng, cityName);
       });
 
@@ -149,7 +149,23 @@ export default function MapModule({ lang }: MapProps) {
   };
 
   const wInfo = weather ? (weatherCodes[weather.weathercode] || { label: "—", icon: "🌡️" }) : null;
-  const tempColor = weather ? (weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#06b6d4" : "#22c55e") : "#06b6d4";
+  const tempColor = weather ? (weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#3b82f6" : "#22c55e") : "#06b6d4";
+
+  // Popup position — bottom left inside map
+  const popupStyle: React.CSSProperties = {
+    position: "absolute",
+    bottom: 40,
+    left: 16,
+    zIndex: 999,
+    width: 280,
+    background: "rgba(6,14,34,0.96)",
+    border: "1px solid rgba(6,182,212,0.4)",
+    borderRadius: 14,
+    padding: 16,
+    backdropFilter: "blur(20px)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(6,182,212,0.1)",
+    animation: "slideIn 0.3s ease",
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -205,83 +221,100 @@ export default function MapModule({ lang }: MapProps) {
         </div>
       )}
 
-      {/* MAP — limpo sem nada dentro */}
-      <div style={{ position: fullscreen ? "fixed" : "relative", top: fullscreen ? 0 : "auto", left: fullscreen ? 0 : "auto", width: fullscreen ? "100vw" : "100%", height: fullscreen ? "100vh" : "60vh", zIndex: fullscreen ? 9999 : 1, borderRadius: fullscreen ? 0 : 14, overflow: "hidden", border: "1px solid #1a2744" }}>
-        <button onClick={() => setFullscreen(!fullscreen)}
-          style={{ position: "absolute", top: 12, right: 12, zIndex: 1000, padding: "8px 14px", borderRadius: 8, background: "rgba(6,14,34,0.9)", border: "1px solid #1a2744", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-          {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          {fullscreen ? l.collapse : l.expand}
-        </button>
-        <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
-      </div>
-
-      {/* PAINEL METEOROLÓGICO — sempre abaixo do mapa */}
-      {weatherLoading && (
-        <div style={{ padding: "16px 20px", borderRadius: 14, background: "linear-gradient(135deg, #0a1628, #060e22)", border: "1px solid #1a2744", display: "flex", alignItems: "center", gap: 12 }}>
-          <Loader size={18} color="#06b6d4" style={{ animation: "spin 1s linear infinite" }} />
-          <span style={{ fontSize: 13, color: "#4a6080" }}>{l.loading}</span>
-        </div>
-      )}
-
-      {weather && !weatherLoading && (
-        <div style={{ padding: "18px 20px", borderRadius: 14, background: "linear-gradient(135deg, #0a1628, #060e22)", border: "1px solid rgba(6,182,212,0.3)" }}>
-          {/* Weather header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-            <div style={{ width: 4, height: 24, background: "linear-gradient(180deg, #06b6d4, #3b82f6)", borderRadius: 2 }} />
-            <span style={{ fontSize: 13, color: "#06b6d4", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em" }}>{l.weatherTitle}</span>
-            <span style={{ fontSize: 22 }}>{wInfo?.icon}</span>
-            <span style={{ fontSize: 13, color: "#94a3b8" }}>{wInfo?.label}</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 16 }}>
-              <div>
-                <p style={{ fontSize: 11, color: "#4a6080", margin: 0, textTransform: "uppercase" }}>{l.lat}</p>
-                <p style={{ fontSize: 12, color: "#06b6d4", fontFamily: "monospace", fontWeight: 700, margin: 0 }}>{weather.lat.toFixed(4)}</p>
-              </div>
-              <div>
-                <p style={{ fontSize: 11, color: "#4a6080", margin: 0, textTransform: "uppercase" }}>{l.lon}</p>
-                <p style={{ fontSize: 12, color: "#06b6d4", fontFamily: "monospace", fontWeight: 700, margin: 0 }}>{weather.lon.toFixed(4)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Location name */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-            <MapPin size={14} color="#f97316" />
-            <span style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>{weather.city}</span>
-          </div>
-
-          {/* Weather cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
-            {[
-              { icon: Thermometer, label: l.temp,     value: `${weather.temperature}°C`, color: tempColor,    sub: weather.temperature > 35 ? "🔴 Extremo" : weather.temperature > 25 ? "🟡 Quente" : "🟢 Agradável" },
-              { icon: Wind,        label: l.wind,     value: `${weather.windspeed} km/h`, color: "#8b5cf6",   sub: weather.windspeed > 50 ? "🔴 Forte" : weather.windspeed > 20 ? "🟡 Moderado" : "🟢 Fraco" },
-              { icon: Droplets,    label: l.humidity, value: `${weather.humidity}%`,      color: "#06b6d4",   sub: weather.humidity > 80 ? "🔵 Alta" : weather.humidity > 50 ? "🟡 Moderada" : "🟠 Baixa" },
-              { icon: Eye,         label: l.rain,     value: `${weather.precipitation} mm`, color: weather.precipitation > 10 ? "#ef4444" : "#22c55e", sub: weather.precipitation > 10 ? "🔴 Intensa" : weather.precipitation > 0 ? "🟡 Leve" : "🟢 Sem chuva" },
-            ].map(({ icon: Icon, label, value, color, sub }) => (
-              <div key={label} style={{ padding: "14px 16px", borderRadius: 10, background: "#060e22", border: `1px solid ${color}25`, transition: "all 0.2s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = color + "60"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = color + "25"; }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                  <Icon size={14} color={color} />
-                  <span style={{ fontSize: 11, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
-                </div>
-                <p style={{ fontSize: 24, fontWeight: 900, color, fontFamily: "monospace", margin: "0 0 6px" }}>{value}</p>
-                <p style={{ fontSize: 12, color: "#4a6080", margin: 0 }}>{sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Click hint — só aparece quando não tem dados ainda */}
-      {!weather && !weatherLoading && (
-        <div style={{ padding: "14px 18px", borderRadius: 12, background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Click hint */}
+      {!showPopup && (
+        <div style={{ padding: "12px 16px", borderRadius: 10, background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", display: "flex", alignItems: "center", gap: 10 }}>
           <MapPin size={14} color="#06b6d4" />
           <span style={{ fontSize: 13, color: "#4a6080" }}>{l.clickHint}</span>
         </div>
       )}
 
+      {/* MAP com popup flutuante dentro */}
+      <div style={{ position: fullscreen ? "fixed" : "relative", top: fullscreen ? 0 : "auto", left: fullscreen ? 0 : "auto", width: fullscreen ? "100vw" : "100%", height: fullscreen ? "100vh" : "65vh", zIndex: fullscreen ? 9999 : 1, borderRadius: fullscreen ? 0 : 14, overflow: "hidden", border: "1px solid #1a2744" }}>
+
+        {/* Fullscreen button */}
+        <button onClick={() => setFullscreen(!fullscreen)}
+          style={{ position: "absolute", top: 12, right: 12, zIndex: 1000, padding: "8px 14px", borderRadius: 8, background: "rgba(6,14,34,0.9)", border: "1px solid #1a2744", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+          {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          {fullscreen ? l.collapse : l.expand}
+        </button>
+
+        {/* Weather popup flutuante */}
+        {showPopup && (
+          <div style={popupStyle}>
+            {/* Popup header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 18 }}>{wInfo?.icon || "🌡️"}</span>
+                <div>
+                  <p style={{ fontSize: 12, color: "#06b6d4", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>{l.weatherTitle}</p>
+                  <p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>{wInfo?.label || "—"}</p>
+                </div>
+              </div>
+              <button onClick={() => { setShowPopup(false); setWeather(null); }}
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex", alignItems: "center" }}>
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* City name */}
+            {weather && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #1a2744" }}>
+                <MapPin size={12} color="#f97316" />
+                <span style={{ fontSize: 13, color: "#fff", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weather.city}</span>
+              </div>
+            )}
+
+            {/* Loading */}
+            {weatherLoading && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0" }}>
+                <Loader size={16} color="#06b6d4" style={{ animation: "spin 1s linear infinite" }} />
+                <span style={{ fontSize: 13, color: "#4a6080" }}>{l.loading}</span>
+              </div>
+            )}
+
+            {/* Weather data */}
+            {weather && !weatherLoading && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {[
+                  { icon: Thermometer, label: l.temp,     value: `${weather.temperature}°C`, color: tempColor },
+                  { icon: Wind,        label: l.wind,     value: `${weather.windspeed} km/h`, color: "#8b5cf6" },
+                  { icon: Droplets,    label: l.humidity, value: `${weather.humidity}%`,      color: "#06b6d4" },
+                  { icon: Eye,         label: l.rain,     value: `${weather.precipitation}mm`, color: weather.precipitation > 5 ? "#ef4444" : "#22c55e" },
+                ].map(({ icon: Icon, label, value, color }) => (
+                  <div key={label} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${color}20` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                      <Icon size={12} color={color} />
+                      <span style={{ fontSize: 10, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
+                    </div>
+                    <p style={{ fontSize: 18, fontWeight: 900, color, fontFamily: "monospace", margin: 0 }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Coords */}
+            {weather && (
+              <div style={{ display: "flex", gap: 16, marginTop: 12, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
+                <div>
+                  <p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p>
+                  <p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{weather.lat.toFixed(4)}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p>
+                  <p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{weather.lon.toFixed(4)}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
+      </div>
+
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input::placeholder { color: #4a6080; }
         .leaflet-container { background: #050d1f !important; font-family: Arial, sans-serif; }
         .leaflet-tile { filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%); }
