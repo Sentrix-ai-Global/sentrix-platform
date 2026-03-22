@@ -1,4 +1,5 @@
-import { Globe, AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap } from "lucide-react";
+import { AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap, Search, ChevronRight, Loader } from "lucide-react";
+import { useState } from "react";
 import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
 
@@ -6,8 +7,51 @@ interface DashboardProps {
   lang: Lang;
 }
 
+interface Location {
+  display_name: string;
+  lat: string;
+  lon: string;
+  place_id: number;
+}
+
+const mapLabels = {
+  pt: { searchPlaceholder: "Buscar localização no mapa...", searching: "Buscando...", search: "BUSCAR" },
+  en: { searchPlaceholder: "Search location on map...", searching: "Searching...", search: "SEARCH" },
+  es: { searchPlaceholder: "Buscar ubicación en el mapa...", searching: "Buscando...", search: "BUSCAR" },
+};
+
 export default function Dashboard({ lang }: DashboardProps) {
   const t = T[lang];
+  const l = mapLabels[lang];
+  const [query, setQuery]     = useState("");
+  const [results, setResults] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [mapUrl, setMapUrl]   = useState("https://www.openstreetmap.org/export/embed.html?bbox=-180,-85,180,85&layer=mapnik");
+
+  const search = async () => {
+    if (!query.trim()) return;
+    setLoading(true);
+    setResults([]);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6`,
+        { headers: { "Accept-Language": lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en" } }
+      );
+      const data = await res.json();
+      setResults(data);
+    } catch (e) { setResults([]); }
+    setLoading(false);
+  };
+
+  const selectLocation = (loc: Location) => {
+    const lat = parseFloat(loc.lat);
+    const lon = parseFloat(loc.lon);
+    const delta = 0.8;
+    const bbox = `${lon - delta},${lat - delta},${lon + delta},${lat + delta}`;
+    setMapUrl(`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik`);
+    setResults([]);
+    setQuery(loc.display_name.split(",")[0]);
+  };
 
   const statCards = [
     { icon: AlertTriangle, label: t.alerts,  value: "3",      color: "#ef4444", pulse: true  },
@@ -29,11 +73,15 @@ export default function Dashboard({ lang }: DashboardProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 24px", background: "linear-gradient(135deg, #0a1628, #060e22)", borderRadius: 16, border: "1px solid #1a2744", position: "relative", overflow: "hidden" }}>
+
+      {/* Hero logo */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 20px 20px", background: "linear-gradient(135deg, #0a1628, #060e22)", borderRadius: 16, border: "1px solid #1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, height: 300, background: "radial-gradient(ellipse, rgba(6,182,212,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <img src="/logo.png" alt="SENTRIX" style={{ width: "100%", maxWidth: 480, height: "auto", filter: "drop-shadow(0 0 24px rgba(6,182,212,0.6)) drop-shadow(0 0 48px rgba(6,182,212,0.2))", position: "relative", zIndex: 1 }} />
-        <p style={{ fontSize: 13, color: "#2a3a54", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "monospace", marginTop: 16, zIndex: 1 }}>{t.subtitle}</p>
+        <img src="/logo.png" alt="SENTRIX" style={{ width: "100%", maxWidth: 420, height: "auto", filter: "drop-shadow(0 0 24px rgba(6,182,212,0.6))", position: "relative", zIndex: 1 }} />
+        <p style={{ fontSize: 13, color: "#2a3a54", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "monospace", marginTop: 12, zIndex: 1 }}>{t.subtitle}</p>
       </div>
+
+      {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14 }}>
         {statCards.map(({ icon: Icon, label, value, color, pulse }) => (
           <div key={label}
@@ -52,6 +100,8 @@ export default function Dashboard({ lang }: DashboardProps) {
           </div>
         ))}
       </div>
+
+      {/* Quick actions */}
       <div>
         <p style={{ fontSize: 13, color: "#2a3a54", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 14, fontWeight: 700 }}>{t.actions}</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 10 }}>
@@ -67,10 +117,62 @@ export default function Dashboard({ lang }: DashboardProps) {
           ))}
         </div>
       </div>
-      <div style={{ padding: 32, borderRadius: 14, background: "linear-gradient(135deg, #0a1628, #060e22)", border: "1px solid #1a2744", textAlign: "center", minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
-        <Globe size={44} color="#1a2744" />
-        <p style={{ fontSize: 13, color: "#2a3a54", fontFamily: "monospace" }}>🛰 SENTRIX MAP ENGINE – {t.building}</p>
+
+      {/* MAP — GRANDE */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: 16, borderRadius: 14, background: "linear-gradient(135deg, #0a1628, #060e22)", border: "1px solid #1a2744" }}>
+        <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ flex: 1, position: "relative" }}>
+            <Search size={15} color="#4a6080" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && search()}
+              placeholder={l.searchPlaceholder}
+              style={{ width: "100%", padding: "10px 12px 10px 36px", borderRadius: 8, background: "#060e22", border: "1px solid #1a2744", color: "#fff", fontSize: 13, outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+          <button onClick={search} disabled={loading}
+            style={{ padding: "10px 20px", borderRadius: 8, background: "linear-gradient(135deg, #06b6d4, #3b82f6)", border: "none", color: "#fff", fontSize: 12, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? <Loader size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Search size={14} />}
+            {loading ? l.searching : l.search}
+          </button>
+        </div>
+
+        {results.length > 0 && (
+          <div style={{ borderRadius: 10, background: "#060e22", border: "1px solid #1a2744", overflow: "hidden" }}>
+            {results.map((loc, i) => (
+              <button key={i} onClick={() => selectLocation(loc)}
+                style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", width: "100%", background: "transparent", border: "none", borderBottom: i < results.length - 1 ? "1px solid #1a2744" : "none", cursor: "pointer", textAlign: "left" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(6,182,212,0.08)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+              >
+                <MapPin size={13} color="#06b6d4" style={{ flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13, color: "#fff", fontWeight: 600, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{loc.display_name.split(",")[0]}</p>
+                  <p style={{ fontSize: 11, color: "#4a6080", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{loc.display_name}</p>
+                </div>
+                <ChevronRight size={13} color="#4a6080" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid #1a2744" }}>
+          <iframe
+            src={mapUrl}
+            width="100%"
+            height="600"
+            style={{ border: "none", display: "block", filter: "invert(90%) hue-rotate(180deg)" }}
+            title="SENTRIX Map Dashboard"
+          />
+        </div>
       </div>
+
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        input::placeholder { color: #4a6080; }
+      `}</style>
     </div>
   );
 }
