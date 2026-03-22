@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap, Search, ChevronRight, Loader, Navigation } from "lucide-react";
+import { AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap, Search, ChevronRight, Loader, Navigation, Maximize2, Minimize2 } from "lucide-react";
 import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -12,21 +11,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-interface DashboardProps {
-  lang: Lang;
-}
-
-interface Location {
-  display_name: string;
-  lat: string;
-  lon: string;
-  place_id: number;
-}
+interface DashboardProps { lang: Lang; }
+interface Location { display_name: string; lat: string; lon: string; place_id: number; }
 
 const mapLabels = {
-  pt: { placeholder: "Buscar localização no mapa...", searching: "Buscando...", search: "BUSCAR" },
-  en: { placeholder: "Search location on map...", searching: "Searching...", search: "SEARCH" },
-  es: { placeholder: "Buscar ubicación en el mapa...", searching: "Buscando...", search: "BUSCAR" },
+  pt: { placeholder: "Buscar localização no mapa...", searching: "Buscando...", search: "BUSCAR", expand: "TELA CHEIA", collapse: "MINIMIZAR" },
+  en: { placeholder: "Search location on map...", searching: "Searching...", search: "SEARCH", expand: "FULL SCREEN", collapse: "MINIMIZE" },
+  es: { placeholder: "Buscar ubicación en el mapa...", searching: "Buscando...", search: "BUSCAR", expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR" },
 };
 
 export default function Dashboard({ lang }: DashboardProps) {
@@ -36,19 +27,36 @@ export default function Dashboard({ lang }: DashboardProps) {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef      = useRef<L.Marker | null>(null);
 
-  const [query, setQuery]     = useState("");
-  const [results, setResults] = useState<Location[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [query, setQuery]           = useState("");
+  const [results, setResults]       = useState<Location[]>([]);
+  const [loading, setLoading]       = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
-    const map = L.map(mapRef.current, { center: [0, 0], zoom: 2, zoomControl: true });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors", maxZoom: 19,
-    }).addTo(map);
-    mapInstanceRef.current = map;
-    return () => { map.remove(); mapInstanceRef.current = null; };
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(link);
+    }
+    const timer = setTimeout(() => {
+      if (!mapRef.current || mapInstanceRef.current) return;
+      const map = L.map(mapRef.current, { center: [0, 0], zoom: 2, zoomControl: true });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors", maxZoom: 19,
+      }).addTo(map);
+      mapInstanceRef.current = map;
+    }, 100);
+    return () => {
+      clearTimeout(timer);
+      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
+    };
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => mapInstanceRef.current?.invalidateSize(), 400);
+  }, [fullscreen]);
 
   const search = async () => {
     if (!query.trim()) return;
@@ -74,7 +82,7 @@ export default function Dashboard({ lang }: DashboardProps) {
     const marker = L.marker([lat, lon]).addTo(map);
     marker.bindPopup(`<strong>${loc.display_name.split(",")[0]}</strong>`).openPopup();
     markerRef.current = marker;
-    map.flyTo([lat, lon], 15, { animate: true, duration: 1.2 });
+    map.flyTo([lat, lon], 15, { animate: true, duration: 1.5 });
     setResults([]);
     setQuery(loc.display_name.split(",")[0]);
   };
@@ -184,17 +192,38 @@ export default function Dashboard({ lang }: DashboardProps) {
           </div>
         )}
 
-        <div ref={mapRef} style={{ height: "55vh", borderRadius: 10, overflow: "hidden", border: "1px solid #1a2744", zIndex: 1 }} />
+        <div style={{
+          position: fullscreen ? "fixed" : "relative",
+          top: fullscreen ? 0 : "auto",
+          left: fullscreen ? 0 : "auto",
+          width: fullscreen ? "100vw" : "100%",
+          height: fullscreen ? "100vh" : "55vh",
+          zIndex: fullscreen ? 9999 : 1,
+          borderRadius: fullscreen ? 0 : 10,
+          overflow: "hidden",
+          border: "1px solid #1a2744",
+        }}>
+          <button
+            onClick={() => setFullscreen(!fullscreen)}
+            style={{ position: "absolute", top: 12, right: 12, zIndex: 1000, padding: "8px 14px", borderRadius: 8, background: "rgba(6,14,34,0.9)", border: "1px solid #1a2744", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+          >
+            {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            {fullscreen ? l.collapse : l.expand}
+          </button>
+          <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
+        </div>
       </div>
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         input::placeholder { color: #4a6080; }
-        .leaflet-container { background: #050d1f !important; }
+        .leaflet-container { background: #050d1f !important; font-family: Arial, sans-serif; }
         .leaflet-tile { filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-control-attribution { background: rgba(6,14,34,0.9) !important; color: #4a6080 !important; }
         .leaflet-control-attribution a { color: #06b6d4 !important; }
         .leaflet-control-zoom a { background: #0a1628 !important; color: #fff !important; border-color: #1a2744 !important; }
+        .leaflet-popup-content-wrapper { background: #0a1628 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 10px !important; }
+        .leaflet-popup-tip { background: #0a1628 !important; }
       `}</style>
     </div>
   );
