@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation } from "lucide-react";
+import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2 } from "lucide-react";
 import type { Lang } from "../../types";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
@@ -24,9 +23,9 @@ interface Location {
 }
 
 const labels = {
-  pt: { title: "MAPA INTELIGENTE", subtitle: "Busca precisa por País • Estado • Cidade • Rua • Número", placeholder: "Digite país, estado, cidade, rua ou endereço completo...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS ENCONTRADOS", lat: "Latitude", lon: "Longitude", noResults: "Nenhum resultado. Tente ser mais específico.", zoom: "ZOOM", location: "LOCALIZAÇÃO SELECIONADA" },
-  en: { title: "SMART MAP", subtitle: "Precise search by Country • State • City • Street • Number", placeholder: "Type country, state, city, street or full address...", searching: "Searching...", search: "SEARCH", results: "RESULTS FOUND", lat: "Latitude", lon: "Longitude", noResults: "No results. Try to be more specific.", zoom: "ZOOM", location: "SELECTED LOCATION" },
-  es: { title: "MAPA INTELIGENTE", subtitle: "Búsqueda precisa por País • Estado • Ciudad • Calle • Número", placeholder: "Escriba país, estado, ciudad, calle o dirección completa...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS ENCONTRADOS", lat: "Latitud", lon: "Longitud", noResults: "Sin resultados. Intente ser más específico.", zoom: "ZOOM", location: "UBICACIÓN SELECCIONADA" },
+  pt: { title: "MAPA INTELIGENTE", subtitle: "Busca precisa por País • Estado • Cidade • Rua • Número", placeholder: "Digite país, estado, cidade, rua ou endereço completo...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS", lat: "Latitude", lon: "Longitude", noResults: "Nenhum resultado. Tente ser mais específico.", location: "LOCALIZAÇÃO SELECIONADA", expand: "TELA CHEIA", collapse: "MINIMIZAR" },
+  en: { title: "SMART MAP", subtitle: "Precise search by Country • State • City • Street • Number", placeholder: "Type country, state, city, street or full address...", searching: "Searching...", search: "SEARCH", results: "RESULTS", lat: "Latitude", lon: "Longitude", noResults: "No results. Try to be more specific.", location: "SELECTED LOCATION", expand: "FULL SCREEN", collapse: "MINIMIZE" },
+  es: { title: "MAPA INTELIGENTE", subtitle: "Búsqueda precisa por País • Estado • Ciudad • Calle • Número", placeholder: "Escriba país, estado, ciudad, calle o dirección completa...", searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS", lat: "Latitud", lon: "Longitud", noResults: "Sin resultados. Intente ser más específico.", location: "UBICACIÓN SELECCIONADA", expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR" },
 };
 
 export default function MapModule({ lang }: MapProps) {
@@ -35,34 +34,29 @@ export default function MapModule({ lang }: MapProps) {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef      = useRef<L.Marker | null>(null);
 
-  const [query, setQuery]       = useState("");
-  const [results, setResults]   = useState<Location[]>([]);
-  const [loading, setLoading]   = useState(false);
-  const [selected, setSelected] = useState<Location | null>(null);
+  const [query, setQuery]         = useState("");
+  const [results, setResults]     = useState<Location[]>([]);
+  const [loading, setLoading]     = useState(false);
+  const [selected, setSelected]   = useState<Location | null>(null);
   const [noResults, setNoResults] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
-  // Init map
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
-
-    const map = L.map(mapRef.current, {
-      center: [0, 0],
-      zoom: 2,
-      zoomControl: true,
-    });
-
+    const map = L.map(mapRef.current, { center: [0, 0], zoom: 2, zoomControl: true });
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
-      maxZoom: 19,
+      attribution: "© OpenStreetMap contributors", maxZoom: 19,
     }).addTo(map);
-
     mapInstanceRef.current = map;
-
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-    };
+    return () => { map.remove(); mapInstanceRef.current = null; };
   }, []);
+
+  // Invalidate map size when fullscreen changes
+  useEffect(() => {
+    setTimeout(() => {
+      mapInstanceRef.current?.invalidateSize();
+    }, 300);
+  }, [fullscreen]);
 
   const search = async () => {
     if (!query.trim()) return;
@@ -77,9 +71,7 @@ export default function MapModule({ lang }: MapProps) {
       const data = await res.json();
       if (data.length === 0) setNoResults(true);
       setResults(data);
-    } catch (e) {
-      setNoResults(true);
-    }
+    } catch (e) { setNoResults(true); }
     setLoading(false);
   };
 
@@ -88,20 +80,11 @@ export default function MapModule({ lang }: MapProps) {
     const lon = parseFloat(loc.lon);
     const map = mapInstanceRef.current;
     if (!map) return;
-
-    // Remove old marker
-    if (markerRef.current) {
-      markerRef.current.remove();
-    }
-
-    // Add new marker
+    if (markerRef.current) markerRef.current.remove();
     const marker = L.marker([lat, lon]).addTo(map);
-    marker.bindPopup(`<strong>${loc.display_name.split(",")[0]}</strong><br/>${loc.display_name}`).openPopup();
+    marker.bindPopup(`<strong>${loc.display_name.split(",")[0]}</strong><br/><small>${loc.display_name}</small>`).openPopup();
     markerRef.current = marker;
-
-    // Zoom preciso
-    map.flyTo([lat, lon], 15, { animate: true, duration: 1.2 });
-
+    map.flyTo([lat, lon], 15, { animate: true, duration: 1.5 });
     setSelected(loc);
     setResults([]);
     setQuery(loc.display_name.split(",")[0]);
@@ -139,7 +122,7 @@ export default function MapModule({ lang }: MapProps) {
         </button>
       </div>
 
-      {/* No results warning */}
+      {/* No results */}
       {noResults && (
         <div style={{ padding: "12px 16px", borderRadius: 10, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", display: "flex", alignItems: "center", gap: 10 }}>
           <AlertTriangle size={16} color="#ef4444" />
@@ -192,8 +175,39 @@ export default function MapModule({ lang }: MapProps) {
         </div>
       )}
 
-      {/* MAP — Leaflet */}
-      <div ref={mapRef} style={{ height: "65vh", borderRadius: 14, overflow: "hidden", border: "1px solid #1a2744", zIndex: 1 }} />
+      {/* MAP container */}
+      <div style={{
+        position: fullscreen ? "fixed" : "relative",
+        top: fullscreen ? 0 : "auto",
+        left: fullscreen ? 0 : "auto",
+        width: fullscreen ? "100vw" : "100%",
+        height: fullscreen ? "100vh" : "auto",
+        zIndex: fullscreen ? 9999 : 1,
+        background: "#050d1f",
+        borderRadius: fullscreen ? 0 : 14,
+        overflow: "hidden",
+        border: "1px solid #1a2744",
+        display: "flex",
+        flexDirection: "column",
+      }}>
+        {/* Fullscreen toggle button */}
+        <button
+          onClick={() => setFullscreen(!fullscreen)}
+          style={{
+            position: "absolute", top: 12, right: 12, zIndex: 1000,
+            padding: "8px 14px", borderRadius: 8,
+            background: "rgba(6,14,34,0.9)", border: "1px solid #1a2744",
+            color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 6,
+            backdropFilter: "blur(10px)"
+          }}
+        >
+          {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          {fullscreen ? l.collapse : l.expand}
+        </button>
+
+        <div ref={mapRef} style={{ flex: 1, height: fullscreen ? "100vh" : "70vh" }} />
+      </div>
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -203,6 +217,8 @@ export default function MapModule({ lang }: MapProps) {
         .leaflet-control-attribution { background: rgba(6,14,34,0.9) !important; color: #4a6080 !important; }
         .leaflet-control-attribution a { color: #06b6d4 !important; }
         .leaflet-control-zoom a { background: #0a1628 !important; color: #fff !important; border-color: #1a2744 !important; }
+        .leaflet-popup-content-wrapper { background: #0a1628 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
+        .leaflet-popup-tip { background: #0a1628 !important; }
       `}</style>
     </div>
   );
