@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity } from "lucide-react";
+import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity, Flame } from "lucide-react";
 import type { Lang } from "../../types";
 import L from "leaflet";
 
@@ -10,52 +10,62 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
+const NASA_FIRMS_KEY = "5dcf43011bc38a1990556e9ea8bc4f44";
+
 interface MapProps { lang: Lang; }
 interface Location { display_name: string; lat: string; lon: string; place_id: number; }
 interface Weather { temperature: number; windspeed: number; humidity: number; precipitation: number; weathercode: number; city: string; lat: number; lon: number; }
-interface Quake { mag: number; place: string; time: number; lat: number; lon: number; depth: number; }
 
 const labels = {
   pt: {
-    title: "MAPA INTELIGENTE", subtitle: "Busca precisa • Meteorologia • Terremotos em tempo real",
+    title: "MAPA INTELIGENTE", subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • Tempo real",
     placeholder: "Digite país, estado, cidade, rua ou endereço...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
     lat: "Lat", lon: "Lon", noResults: "Nenhum resultado. Tente ser mais específico.",
     expand: "TELA CHEIA", collapse: "MINIMIZAR",
     weatherTitle: "METEOROLOGIA", weatherFull: "DADOS METEOROLÓGICOS EM TEMPO REAL",
     temp: "Temp.", wind: "Vento", humidity: "Umidade", rain: "Chuva",
-    loading: "Carregando...", clickHint: "🌍 Clique no mapa para meteorologia • 🔴 Círculos = terremotos em tempo real",
-    quakeTitle: "TERREMOTO DETECTADO", quakeMag: "Magnitude", quakeDepth: "Profundidade",
-    quakeTime: "Horário", quakePlace: "Local", quakeLayer: "🔴 TERREMOTOS AO VIVO",
+    loading: "Carregando...",
+    clickHint: "🌍 Clique no mapa • 🟠 Terremotos USGS • 🔥 Incêndios NASA",
+    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitude", quakeDepth: "Profundidade",
+    quakeTime: "Horário", quakeLayer: "🟠 TERREMOTOS AO VIVO",
     quakeLoading: "Carregando terremotos...",
+    fireTitle: "INCÊNDIO — NASA FIRMS", fireLayer: "🔥 INCÊNDIOS NASA AO VIVO",
+    fireLoading: "Carregando incêndios...", fireBrightness: "Temperatura", fireConfidence: "Confiança",
     low: "Baixo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
   },
   en: {
-    title: "SMART MAP", subtitle: "Precise search • Weather • Real-time earthquakes",
+    title: "SMART MAP", subtitle: "Weather • USGS Earthquakes • NASA Fires • Real-time",
     placeholder: "Type country, state, city, street or address...",
     searching: "Searching...", search: "SEARCH", results: "RESULTS",
     lat: "Lat", lon: "Lon", noResults: "No results. Try to be more specific.",
     expand: "FULL SCREEN", collapse: "MINIMIZE",
     weatherTitle: "WEATHER", weatherFull: "REAL-TIME WEATHER DATA",
     temp: "Temp.", wind: "Wind", humidity: "Humidity", rain: "Rain",
-    loading: "Loading...", clickHint: "🌍 Click map for weather • 🔴 Circles = real-time earthquakes",
-    quakeTitle: "EARTHQUAKE DETECTED", quakeMag: "Magnitude", quakeDepth: "Depth",
-    quakeTime: "Time", quakePlace: "Location", quakeLayer: "🔴 LIVE EARTHQUAKES",
+    loading: "Loading...",
+    clickHint: "🌍 Click map • 🟠 USGS Earthquakes • 🔥 NASA Fires",
+    quakeTitle: "EARTHQUAKE — USGS", quakeMag: "Magnitude", quakeDepth: "Depth",
+    quakeTime: "Time", quakeLayer: "🟠 LIVE EARTHQUAKES",
     quakeLoading: "Loading earthquakes...",
+    fireTitle: "FIRE — NASA FIRMS", fireLayer: "🔥 NASA LIVE FIRES",
+    fireLoading: "Loading fires...", fireBrightness: "Temperature", fireConfidence: "Confidence",
     low: "Low", moderate: "Moderate", high: "High", extreme: "Extreme",
   },
   es: {
-    title: "MAPA INTELIGENTE", subtitle: "Búsqueda precisa • Meteorología • Terremotos en tiempo real",
+    title: "MAPA INTELIGENTE", subtitle: "Meteorología • Terremotos USGS • Incendios NASA • Tiempo real",
     placeholder: "Escriba país, estado, ciudad, calle o dirección...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
     lat: "Lat", lon: "Lon", noResults: "Sin resultados. Intente ser más específico.",
     expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR",
     weatherTitle: "METEOROLOGÍA", weatherFull: "DATOS METEOROLÓGICOS EN TIEMPO REAL",
     temp: "Temp.", wind: "Viento", humidity: "Humedad", rain: "Lluvia",
-    loading: "Cargando...", clickHint: "🌍 Clic en el mapa para meteorología • 🔴 Círculos = terremotos en tiempo real",
-    quakeTitle: "TERREMOTO DETECTADO", quakeMag: "Magnitud", quakeDepth: "Profundidad",
-    quakeTime: "Hora", quakePlace: "Lugar", quakeLayer: "🔴 TERREMOTOS EN VIVO",
+    loading: "Cargando...",
+    clickHint: "🌍 Clic en el mapa • 🟠 Terremotos USGS • 🔥 Incendios NASA",
+    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitud", quakeDepth: "Profundidad",
+    quakeTime: "Hora", quakeLayer: "🟠 TERREMOTOS EN VIVO",
     quakeLoading: "Cargando terremotos...",
+    fireTitle: "INCENDIO — NASA FIRMS", fireLayer: "🔥 INCENDIOS NASA EN VIVO",
+    fireLoading: "Cargando incendios...", fireBrightness: "Temperatura", fireConfidence: "Confianza",
     low: "Bajo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
   },
 };
@@ -80,24 +90,28 @@ export default function MapModule({ lang }: MapProps) {
   const markerRef      = useRef<L.Marker | null>(null);
   const clickMarkerRef = useRef<L.Marker | null>(null);
   const quakeLayerRef  = useRef<L.LayerGroup | null>(null);
+  const fireLayerRef   = useRef<L.LayerGroup | null>(null);
 
-  const [query, setQuery]                   = useState("");
-  const [results, setResults]               = useState<Location[]>([]);
-  const [loading, setLoading]               = useState(false);
-  const [noResults, setNoResults]           = useState(false);
-  const [fullscreen, setFullscreen]         = useState(false);
-  const [weather, setWeather]               = useState<Weather | null>(null);
-  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [query, setQuery]                       = useState("");
+  const [results, setResults]                   = useState<Location[]>([]);
+  const [loading, setLoading]                   = useState(false);
+  const [noResults, setNoResults]               = useState(false);
+  const [fullscreen, setFullscreen]             = useState(false);
+  const [weather, setWeather]                   = useState<Weather | null>(null);
+  const [weatherLoading, setWeatherLoading]     = useState(false);
   const [showWeatherPopup, setShowWeatherPopup] = useState(false);
-  const [quake, setQuake]                   = useState<Quake | null>(null);
-  const [showQuakePopup, setShowQuakePopup] = useState(false);
-  const [quakeLoading, setQuakeLoading]     = useState(true);
-  const [selected, setSelected]             = useState<Location | null>(null);
+  const [quake, setQuake]                       = useState<{ mag: number; place: string; time: number; lat: number; lon: number; depth: number } | null>(null);
+  const [showQuakePopup, setShowQuakePopup]     = useState(false);
+  const [quakeLoading, setQuakeLoading]         = useState(true);
+  const [fireLoading, setFireLoading]           = useState(true);
+  const [firePop, setFirePop]                   = useState<{ lat: number; lon: number; brightness: number; confidence: string } | null>(null);
+  const [showFirePopup, setShowFirePopup]       = useState(false);
 
   const fetchWeather = async (lat: number, lon: number, cityName?: string) => {
     setWeatherLoading(true);
     setShowWeatherPopup(true);
     setShowQuakePopup(false);
+    setShowFirePopup(false);
     setWeather(null);
     try {
       const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=auto`);
@@ -113,10 +127,8 @@ export default function MapModule({ lang }: MapProps) {
     try {
       const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
       const data = await res.json();
-      if (quakeLayerRef.current) quakeLayerRef.current.clearLayers();
-      const layer = quakeLayerRef.current || L.layerGroup().addTo(map);
+      const layer = L.layerGroup().addTo(map);
       quakeLayerRef.current = layer;
-
       data.features.forEach((f: any) => {
         const [lon, lat] = f.geometry.coordinates;
         const mag = f.properties.mag;
@@ -124,25 +136,61 @@ export default function MapModule({ lang }: MapProps) {
         const time = f.properties.time;
         const depth = f.geometry.coordinates[2];
         if (!mag || mag < 1) return;
-
         const circle = L.circleMarker([lat, lon], {
-          radius: quakeRadius(mag),
-          fillColor: quakeColor(mag),
-          color: "#fff",
-          weight: 1,
-          opacity: 0.9,
-          fillOpacity: 0.7,
+          radius: quakeRadius(mag), fillColor: quakeColor(mag),
+          color: "#fff", weight: 1.5, opacity: 0.9, fillOpacity: 0.75,
         }).addTo(layer);
-
         circle.on("click", (e: L.LeafletMouseEvent) => {
           L.DomEvent.stopPropagation(e);
           setQuake({ mag, place, time, lat, lon, depth });
           setShowQuakePopup(true);
           setShowWeatherPopup(false);
+          setShowFirePopup(false);
         });
       });
     } catch (e) {}
     setQuakeLoading(false);
+  };
+
+  const loadFires = async (map: L.Map) => {
+    setFireLoading(true);
+    try {
+      // NASA FIRMS API com chave oficial
+      const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${NASA_FIRMS_KEY}/VIIRS_SNPP_NRT/world/1`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      const layer = L.layerGroup().addTo(map);
+      fireLayerRef.current = layer;
+
+      lines.slice(0, 800).forEach((line: string) => {
+        const cols = line.split(",");
+        const lat = parseFloat(cols[0]);
+        const lon = parseFloat(cols[1]);
+        const brightness = parseFloat(cols[2]);
+        const confidence = cols[9] || "n/a";
+        if (isNaN(lat) || isNaN(lon)) return;
+
+        // Círculo vermelho para incêndios — diferente dos terremotos
+        const circle = L.circleMarker([lat, lon], {
+          radius: 5,
+          fillColor: "#ef4444",
+          color: "#f97316",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.85,
+        }).addTo(layer);
+
+        circle.on("click", (e: L.LeafletMouseEvent) => {
+          L.DomEvent.stopPropagation(e);
+          setFirePop({ lat, lon, brightness, confidence });
+          setShowFirePopup(true);
+          setShowQuakePopup(false);
+          setShowWeatherPopup(false);
+        });
+      });
+    } catch (e) {}
+    setFireLoading(false);
   };
 
   useEffect(() => {
@@ -164,7 +212,7 @@ export default function MapModule({ lang }: MapProps) {
         const { lat, lng } = e.latlng;
         if (clickMarkerRef.current) clickMarkerRef.current.remove();
         const clickIcon = L.divIcon({
-          html: `<div style="width:14px;height:14px;background:#f97316;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(249,115,22,0.9)"></div>`,
+          html: `<div style="width:14px;height:14px;background:#06b6d4;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(6,182,212,0.9)"></div>`,
           iconSize: [14, 14], iconAnchor: [7, 7], className: ""
         });
         clickMarkerRef.current = L.marker([lat, lng], { icon: clickIcon }).addTo(map);
@@ -179,6 +227,7 @@ export default function MapModule({ lang }: MapProps) {
 
       mapInstanceRef.current = map;
       loadEarthquakes(map);
+      loadFires(map);
     }, 100);
 
     return () => {
@@ -193,9 +242,7 @@ export default function MapModule({ lang }: MapProps) {
 
   const search = async () => {
     if (!query.trim()) return;
-    setLoading(true);
-    setResults([]);
-    setNoResults(false);
+    setLoading(true); setResults([]); setNoResults(false);
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&addressdetails=1`,
@@ -218,7 +265,6 @@ export default function MapModule({ lang }: MapProps) {
     marker.bindPopup(`<strong>${loc.display_name.split(",")[0]}</strong>`).openPopup();
     markerRef.current = marker;
     map.flyTo([lat, lon], 10, { animate: true, duration: 1.5 });
-    setSelected(loc);
     setResults([]);
     setQuery(loc.display_name.split(",")[0]);
     fetchWeather(lat, lon, loc.display_name.split(",")[0]);
@@ -226,8 +272,17 @@ export default function MapModule({ lang }: MapProps) {
 
   const wInfo = weather ? (weatherCodes[weather.weathercode] || { label: "—", icon: "🌡️" }) : null;
   const tempColor = weather ? (weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#3b82f6" : "#22c55e") : "#06b6d4";
-
   const quakeMagLabel = (mag: number) => mag >= 7 ? l.extreme : mag >= 5 ? l.high : mag >= 3 ? l.moderate : l.low;
+
+  const popupBase: React.CSSProperties = {
+    position: "absolute", bottom: 16, left: 16, zIndex: 999,
+    width: "min(280px, calc(100vw - 32px))",
+    background: "rgba(6,14,34,0.97)",
+    borderRadius: 14, padding: 16,
+    backdropFilter: "blur(20px)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+    animation: "slideIn 0.3s ease",
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -283,20 +338,34 @@ export default function MapModule({ lang }: MapProps) {
         </div>
       )}
 
-      {/* Hint + quake status */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", flexWrap: "wrap" }}>
-        <MapPin size={13} color="#06b6d4" />
-        <span style={{ fontSize: 12, color: "#4a6080", flex: 1 }}>{l.clickHint}</span>
-        {quakeLoading
-          ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={11} style={{ animation: "spin 1s linear infinite" }} /> {l.quakeLoading}</span>
-          : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.quakeLayer}</span>
-        }
+      {/* Legenda + status */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", flexWrap: "wrap" }}>
+        <span style={{ fontSize: 12, color: "#4a6080" }}>{l.clickHint}</span>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 12, flexWrap: "wrap" }}>
+          {quakeLoading
+            ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.quakeLoading}</span>
+            : <span style={{ fontSize: 11, color: "#f97316", fontWeight: 700 }}>{l.quakeLayer}</span>
+          }
+          {fireLoading
+            ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.fireLoading}</span>
+            : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.fireLayer}</span>
+          }
+        </div>
+      </div>
+
+      {/* Legenda de cores */}
+      <div style={{ display: "flex", gap: 16, padding: "10px 14px", borderRadius: 10, background: "#0a1628", border: "1px solid #1a2744", flexWrap: "wrap" }}>
+        <span style={{ fontSize: 11, color: "#4a6080", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>Legenda:</span>
+        <span style={{ fontSize: 11, color: "#06b6d4" }}>🔵 Clique = Meteorologia</span>
+        <span style={{ fontSize: 11, color: "#22c55e" }}>🟢 M1-3 Terremoto leve</span>
+        <span style={{ fontSize: 11, color: "#f59e0b" }}>🟡 M3-5 Moderado</span>
+        <span style={{ fontSize: 11, color: "#f97316" }}>🟠 M5-7 Alto</span>
+        <span style={{ fontSize: 11, color: "#ef4444" }}>🔴 M7+ Extremo • 🔴 Incêndio NASA</span>
       </div>
 
       {/* MAP */}
       <div style={{ position: fullscreen ? "fixed" : "relative", top: fullscreen ? 0 : "auto", left: fullscreen ? 0 : "auto", width: fullscreen ? "100vw" : "100%", height: fullscreen ? "100vh" : "62vh", zIndex: fullscreen ? 9999 : 1, borderRadius: fullscreen ? 0 : 14, overflow: "hidden", border: "1px solid #1a2744" }}>
 
-        {/* Fullscreen button */}
         <button onClick={() => setFullscreen(!fullscreen)}
           style={{ position: "absolute", top: 12, right: 12, zIndex: 1000, padding: "8px 14px", borderRadius: 8, background: "rgba(6,14,34,0.9)", border: "1px solid #1a2744", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
           {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -305,20 +374,18 @@ export default function MapModule({ lang }: MapProps) {
 
         {/* WEATHER POPUP */}
         {showWeatherPopup && (
-          <div style={{ position: "absolute", bottom: 16, left: 16, zIndex: 999, width: "min(280px, calc(100vw - 32px))", background: "rgba(6,14,34,0.96)", border: "1px solid rgba(6,182,212,0.4)", borderRadius: 14, padding: 16, backdropFilter: "blur(20px)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)", animation: "slideIn 0.3s ease" }}>
+          <div style={{ ...popupBase, border: "1px solid rgba(6,182,212,0.5)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 18 }}>{wInfo?.icon || "🌡️"}</span>
                 <div>
-                  <p style={{ fontSize: 12, color: "#06b6d4", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>{l.weatherTitle}</p>
+                  <p style={{ fontSize: 12, color: "#06b6d4", fontWeight: 900, textTransform: "uppercase", margin: 0 }}>{l.weatherTitle}</p>
                   <p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>{wInfo?.label || "—"}</p>
                 </div>
               </div>
-              <button onClick={() => setShowWeatherPopup(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex" }}>
-                <X size={14} />
-              </button>
+              <button onClick={() => setShowWeatherPopup(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex" }}><X size={14} /></button>
             </div>
-            {weather && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #1a2744" }}><MapPin size={12} color="#f97316" /><span style={{ fontSize: 13, color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{weather.city}</span></div>}
+            {weather && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #1a2744" }}><MapPin size={12} color="#06b6d4" /><span style={{ fontSize: 13, color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{weather.city}</span></div>}
             {weatherLoading && <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Loader size={15} color="#06b6d4" style={{ animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: "#4a6080" }}>{l.loading}</span></div>}
             {weather && !weatherLoading && (
               <>
@@ -346,18 +413,16 @@ export default function MapModule({ lang }: MapProps) {
 
         {/* QUAKE POPUP */}
         {showQuakePopup && quake && (
-          <div style={{ position: "absolute", bottom: 16, left: 16, zIndex: 999, width: "min(280px, calc(100vw - 32px))", background: "rgba(6,14,34,0.96)", border: `1px solid ${quakeColor(quake.mag)}60`, borderRadius: 14, padding: 16, backdropFilter: "blur(20px)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)", animation: "slideIn 0.3s ease" }}>
+          <div style={{ ...popupBase, border: `1px solid ${quakeColor(quake.mag)}70` }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 18 }}>🌍</span>
                 <div>
-                  <p style={{ fontSize: 12, color: quakeColor(quake.mag), fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>{l.quakeTitle}</p>
+                  <p style={{ fontSize: 12, color: quakeColor(quake.mag), fontWeight: 900, textTransform: "uppercase", margin: 0 }}>{l.quakeTitle}</p>
                   <p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>{quakeMagLabel(quake.mag)}</p>
                 </div>
               </div>
-              <button onClick={() => setShowQuakePopup(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex" }}>
-                <X size={14} />
-              </button>
+              <button onClick={() => setShowQuakePopup(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex" }}><X size={14} /></button>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #1a2744" }}>
               <MapPin size={12} color={quakeColor(quake.mag)} />
@@ -381,6 +446,36 @@ export default function MapModule({ lang }: MapProps) {
           </div>
         )}
 
+        {/* FIRE POPUP */}
+        {showFirePopup && firePop && (
+          <div style={{ ...popupBase, border: "1px solid rgba(239,68,68,0.6)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 18 }}>🔥</span>
+                <div>
+                  <p style={{ fontSize: 12, color: "#ef4444", fontWeight: 900, textTransform: "uppercase", margin: 0 }}>{l.fireTitle}</p>
+                  <p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>VIIRS SNPP — NASA</p>
+                </div>
+              </div>
+              <button onClick={() => setShowFirePopup(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex" }}><X size={14} /></button>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+              <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(239,68,68,0.3)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Flame size={12} color="#ef4444" /><span style={{ fontSize: 10, color: "#4a6080", textTransform: "uppercase" }}>{l.fireBrightness}</span></div>
+                <p style={{ fontSize: 20, fontWeight: 900, color: "#ef4444", fontFamily: "monospace", margin: 0 }}>{firePop.brightness.toFixed(0)}K</p>
+              </div>
+              <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(245,158,11,0.3)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Activity size={12} color="#f59e0b" /><span style={{ fontSize: 10, color: "#4a6080", textTransform: "uppercase" }}>{l.fireConfidence}</span></div>
+                <p style={{ fontSize: 20, fontWeight: 900, color: "#f59e0b", fontFamily: "monospace", margin: 0 }}>{firePop.confidence}%</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lat.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lon.toFixed(3)}</p></div>
+            </div>
+          </div>
+        )}
+
         <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
       </div>
 
@@ -397,7 +492,7 @@ export default function MapModule({ lang }: MapProps) {
               <div><p style={{ fontSize: 10, color: "#4a6080", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#06b6d4", fontFamily: "monospace", fontWeight: 700, margin: 0 }}>{weather.lon.toFixed(4)}</p></div>
             </div>}
           </div>
-          {weather && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}><MapPin size={13} color="#f97316" /><span style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>{weather.city}</span></div>}
+          {weather && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}><MapPin size={13} color="#06b6d4" /><span style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>{weather.city}</span></div>}
           {weatherLoading && <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Loader size={16} color="#06b6d4" style={{ animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: "#4a6080" }}>{l.loading}</span></div>}
           {weather && !weatherLoading && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
@@ -431,9 +526,7 @@ export default function MapModule({ lang }: MapProps) {
         .leaflet-control-zoom a { background: #0a1628 !important; color: #fff !important; border-color: #1a2744 !important; }
         .leaflet-popup-content-wrapper { background: #0a1628 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 10px !important; }
         .leaflet-popup-tip { background: #0a1628 !important; }
-        @media (max-width: 768px) {
-          h1 { font-size: 18px !important; }
-        }
+        @media (max-width: 768px) { h1 { font-size: 18px !important; } }
       `}</style>
     </div>
   );
