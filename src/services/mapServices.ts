@@ -56,7 +56,6 @@ export async function fetchNasaFires(): Promise<FireFeature[]> {
 
 export async function fetchInpeFires(): Promise<InpeFeature[]> {
   try {
-    // Proxy CORS-free via allorigins
     const target = encodeURIComponent("https://queimadas.dgi.inpe.br/api/focos/?pais_id=33&quantidade=500");
     const res = await fetch(`https://api.allorigins.win/get?url=${target}`);
     const wrapper = await res.json();
@@ -114,7 +113,9 @@ export async function fetchAirQuality(lat: number, lon: number): Promise<AirQual
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,pm10,pm2_5`);
     const data = await res.json();
     const c = data.current;
-    const aqi = c.european_aqi ?? 0, pm25 = c.pm2_5 ?? 0, pm10 = c.pm10 ?? 0;
+    const aqi: number = c.european_aqi ?? 0;
+    const pm25: number = c.pm2_5 ?? 0;
+    const pm10: number = c.pm10 ?? 0;
     const level: AirQualityFeature["level"] = aqi > 100 ? "hazardous" : aqi > 50 ? "poor" : aqi > 25 ? "moderate" : "good";
     return { lat, lon, aqi, pm25, pm10, level };
   } catch { return null; }
@@ -133,15 +134,31 @@ export async function fetchWeather(lat: number, lon: number, cityName?: string):
   } catch { return null; }
 }
 
-export const quakeColor  = (mag: number): string =>
+export const quakeColor = (mag: number): string =>
   mag >= 7 ? "#ef4444" : mag >= 5 ? "#f97316" : mag >= 3 ? "#f59e0b" : "#22c55e";
+
 export const quakeRadius = (mag: number): number => Math.max(6, mag * 5);
-export const airQualityColor = (level: AirQualityFeature["level"]): string =>
-  ({ good: "#22c55e", moderate: "#f59e0b", poor: "#f97316", hazardous: "#ef4444" }[level]);
-export const floodColor = (level: FloodFeature["level"]): string =>
-  ({ normal: "#22c55e", attention: "#f59e0b", critical: "#ef4444" }[level]);
-export const gdacsColor = (level: GdacsEvent["alertLevel"]): string =>
-  ({ green: "#22c55e", orange: "#f97316", red: "#ef4444" }[level]);
+
+export const airQualityColor = (level: AirQualityFeature["level"]): string => {
+  const map: Record<AirQualityFeature["level"], string> = {
+    good: "#22c55e", moderate: "#f59e0b", poor: "#f97316", hazardous: "#ef4444",
+  };
+  return map[level];
+};
+
+export const floodColor = (level: FloodFeature["level"]): string => {
+  const map: Record<FloodFeature["level"], string> = {
+    normal: "#22c55e", attention: "#f59e0b", critical: "#ef4444",
+  };
+  return map[level];
+};
+
+export const gdacsColor = (level: GdacsEvent["alertLevel"]): string => {
+  const map: Record<GdacsEvent["alertLevel"], string> = {
+    green: "#22c55e", orange: "#f97316", red: "#ef4444",
+  };
+  return map[level];
+};
 
 export const weatherCodes: Record<number, { label: string; icon: string }> = {
   0:  { label: "Céu limpo",            icon: "☀️"  },

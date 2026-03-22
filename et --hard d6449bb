@@ -1,0 +1,30 @@
+[33mee23abc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m feat: camada de servicos mapServices + Flood API + Air Quality integrados
+[33m4e2f18f[m feat: INPE BDQueimadas Brasil + NASA FIRMS cores distintas
+[33md0d715a[m feat: NASA FIRMS com chave oficial VIIRS incendios em tempo real
+[33md6449bb[m feat: terremotos USGS em tempo real no mapa com popup e mobile
+[33m0ce29d1[m feat: popup flutuante + painel fixo abaixo do mapa juntos
+[33m4c32ef3[m feat: popup meteorologico flutuante com X para fechar dentro do mapa
+[33m81a2183[m fix: painel meteorologico abaixo do mapa sem sobrepor
+[33maef29c3[m feat: meteorologia em tempo real por clique no mapa
+[33mf74296b[m feat: mapa Leaflet tela cheia no dashboard
+[33meb389d2[m fix: carrega CSS Leaflet via CDN dinamicamente
+[33m5883bb5[m fix: importa CSS do Leaflet no main.tsx
+[33m74b2bd5[m feat: mapa tela cheia expansivel estilo YouTube
+[33m5c5aebf[m feat: mapa Leaflet preciso no dashboard e mapa inteligente
+[33m73627bc[m feat: mapa inteligente com Leaflet busca precisa por endereco
+[33mf21c72d[m feat: mapa grande no dashboard e mapa inteligente
+[33mca85478[m fix: remove texto e bolinha do meio do mapa
+[33m949ac41[m feat: adiciona modulo mapa inteligente no App
+[33m84c7158[m feat: modulo mapa inteligente com OpenStreetMap
+[33m03b0910[m fix: corrige todos os imports de tipos
+[33m1cc1df2[m fix: force rebuild
+[33mf329b19[m fix: corrige importacao do tipo Lang
+[33m6327505[m feat: reestruturacao modular do projeto
+[33m81948b9[m feat: módulos Sistema de Alertas e Catástrofes Naturais
+[33m6597e1f[m feat: fontes maiores em todo o sistema
+[33mfe4dd48[m feat: modulo IA Preditiva completo multilíngue
+[33m66d42ac[m feat: logo grande no painel central
+[33mb62471d[m feat: logo grande e impactante no sidebar
+[33ma645679[m fix: logo renomeada
+[33m1c13e4d[m feat: logo Sentrix adicionada ao sidebar
+[33mdccb3dd[m feat: SENTRIX v3.0 - novo projeto do zero
