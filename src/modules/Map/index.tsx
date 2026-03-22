@@ -1,24 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity, Flame } from "lucide-react";
+import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity, Flame, Wind as WindIcon } from "lucide-react";
 import type { Lang } from "../../types";
 import L from "leaflet";
+import {
+  fetchEarthquakes, fetchNasaFires, fetchInpeFires,
+  fetchFloodData, fetchAirQuality, fetchWeather,
+  quakeColor, quakeRadius, airQualityColor, floodColor, weatherCodes,
+  type WeatherData, type FloodFeature, type AirQualityFeature,
+} from "../../services/mapServices";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconUrl:       "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl:     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
-
-const NASA_FIRMS_KEY = "5dcf43011bc38a1990556e9ea8bc4f44";
 
 interface MapProps { lang: Lang; }
 interface Location { display_name: string; lat: string; lon: string; place_id: number; }
-interface Weather { temperature: number; windspeed: number; humidity: number; precipitation: number; weathercode: number; city: string; lat: number; lon: number; }
 
 const labels = {
   pt: {
-    title: "MAPA INTELIGENTE", subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • Queimadas INPE",
+    title: "MAPA INTELIGENTE",
+    subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • Queimadas INPE • Enchentes • Qualidade do Ar",
     placeholder: "Digite país, estado, cidade, rua ou endereço...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
     lat: "Lat", lon: "Lon", noResults: "Nenhum resultado encontrado.",
@@ -26,19 +30,25 @@ const labels = {
     weatherTitle: "METEOROLOGIA", weatherFull: "DADOS METEOROLÓGICOS EM TEMPO REAL",
     temp: "Temp.", wind: "Vento", humidity: "Umidade", rain: "Chuva",
     loading: "Carregando...",
-    clickHint: "🌍 Clique no mapa • 🟠 Terremotos USGS • 🔴 NASA FIRMS • 🟡 Queimadas INPE",
-    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitude", quakeDepth: "Profundidade",
-    quakeTime: "Horário", quakeLayer: "🟠 TERREMOTOS AO VIVO",
-    quakeLoading: "Carregando terremotos...",
+    clickHint: "🌐 Clique no mapa para dados ao vivo",
+    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitude", quakeDepth: "Profundidade", quakeTime: "Horário",
+    quakeLayer: "🟠 TERREMOTOS AO VIVO", quakeLoading: "Carregando terremotos...",
     fireTitle: "INCÊNDIO — NASA FIRMS", fireLayer: "🔴 INCÊNDIOS NASA",
     fireLoading: "Carregando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confiança",
     inpeTitle: "QUEIMADA — INPE BRASIL", inpeLayer: "🟡 QUEIMADAS INPE",
     inpeLoading: "Carregando INPE...", inpeMunicipality: "Município", inpeState: "Estado",
+    floodTitle: "ENCHENTE — OPEN-METEO", floodLayer: "🔵 ENCHENTES", floodLoading: "Analisando rios...",
+    floodDischarge: "Descarga (m³/s)", floodStatus: "Status do Rio",
+    airTitle: "QUALIDADE DO AR", airLayer: "🟢 QUALIDADE DO AR", airLoading: "Carregando ar...",
+    airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
     low: "Baixo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
     legend: "LEGENDA",
+    floodNormal: "Normal", floodAttention: "Atenção", floodCritical: "Crítico",
+    airGood: "Boa", airModerate: "Moderada", airPoor: "Ruim", airHazardous: "Perigosa",
   },
   en: {
-    title: "SMART MAP", subtitle: "Weather • USGS Earthquakes • NASA Fires • INPE Brazil Fires",
+    title: "SMART MAP",
+    subtitle: "Weather • USGS Earthquakes • NASA Fires • INPE Brazil • Floods • Air Quality",
     placeholder: "Type country, state, city, street or address...",
     searching: "Searching...", search: "SEARCH", results: "RESULTS",
     lat: "Lat", lon: "Lon", noResults: "No results found.",
@@ -46,19 +56,25 @@ const labels = {
     weatherTitle: "WEATHER", weatherFull: "REAL-TIME WEATHER DATA",
     temp: "Temp.", wind: "Wind", humidity: "Humidity", rain: "Rain",
     loading: "Loading...",
-    clickHint: "🌍 Click map • 🟠 USGS Earthquakes • 🔴 NASA FIRMS • 🟡 INPE Fires",
-    quakeTitle: "EARTHQUAKE — USGS", quakeMag: "Magnitude", quakeDepth: "Depth",
-    quakeTime: "Time", quakeLayer: "🟠 LIVE EARTHQUAKES",
-    quakeLoading: "Loading earthquakes...",
+    clickHint: "🌐 Click map for live data",
+    quakeTitle: "EARTHQUAKE — USGS", quakeMag: "Magnitude", quakeDepth: "Depth", quakeTime: "Time",
+    quakeLayer: "🟠 LIVE EARTHQUAKES", quakeLoading: "Loading earthquakes...",
     fireTitle: "FIRE — NASA FIRMS", fireLayer: "🔴 NASA FIRES",
     fireLoading: "Loading NASA...", fireBrightness: "Temperature", fireConfidence: "Confidence",
     inpeTitle: "FIRE — INPE BRAZIL", inpeLayer: "🟡 INPE FIRES",
     inpeLoading: "Loading INPE...", inpeMunicipality: "Municipality", inpeState: "State",
+    floodTitle: "FLOOD — OPEN-METEO", floodLayer: "🔵 FLOODS", floodLoading: "Analyzing rivers...",
+    floodDischarge: "Discharge (m³/s)", floodStatus: "River Status",
+    airTitle: "AIR QUALITY", airLayer: "🟢 AIR QUALITY", airLoading: "Loading air...",
+    airAqi: "AQI Index", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
     low: "Low", moderate: "Moderate", high: "High", extreme: "Extreme",
     legend: "LEGEND",
+    floodNormal: "Normal", floodAttention: "Attention", floodCritical: "Critical",
+    airGood: "Good", airModerate: "Moderate", airPoor: "Poor", airHazardous: "Hazardous",
   },
   es: {
-    title: "MAPA INTELIGENTE", subtitle: "Meteorología • Terremotos USGS • Incendios NASA • Queimadas INPE",
+    title: "MAPA INTELIGENTE",
+    subtitle: "Meteorología • Terremotos USGS • Incendios NASA • INPE Brasil • Inundaciones • Calidad del Aire",
     placeholder: "Escriba país, estado, ciudad, calle o dirección...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
     lat: "Lat", lon: "Lon", noResults: "Sin resultados.",
@@ -66,48 +82,40 @@ const labels = {
     weatherTitle: "METEOROLOGÍA", weatherFull: "DATOS METEOROLÓGICOS EN TIEMPO REAL",
     temp: "Temp.", wind: "Viento", humidity: "Humedad", rain: "Lluvia",
     loading: "Cargando...",
-    clickHint: "🌍 Clic en el mapa • 🟠 Terremotos USGS • 🔴 NASA FIRMS • 🟡 INPE Brasil",
-    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitud", quakeDepth: "Profundidad",
-    quakeTime: "Hora", quakeLayer: "🟠 TERREMOTOS EN VIVO",
-    quakeLoading: "Cargando terremotos...",
+    clickHint: "🌐 Clic en el mapa para datos en vivo",
+    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitud", quakeDepth: "Profundidad", quakeTime: "Hora",
+    quakeLayer: "🟠 TERREMOTOS EN VIVO", quakeLoading: "Cargando terremotos...",
     fireTitle: "INCENDIO — NASA FIRMS", fireLayer: "🔴 INCENDIOS NASA",
     fireLoading: "Cargando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confianza",
     inpeTitle: "INCENDIO — INPE BRASIL", inpeLayer: "🟡 QUEIMADAS INPE",
     inpeLoading: "Cargando INPE...", inpeMunicipality: "Municipio", inpeState: "Estado",
+    floodTitle: "INUNDACIÓN — OPEN-METEO", floodLayer: "🔵 INUNDACIONES", floodLoading: "Analizando ríos...",
+    floodDischarge: "Descarga (m³/s)", floodStatus: "Estado del Río",
+    airTitle: "CALIDAD DEL AIRE", airLayer: "🟢 CALIDAD DEL AIRE", airLoading: "Cargando aire...",
+    airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
     low: "Bajo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
     legend: "LEYENDA",
+    floodNormal: "Normal", floodAttention: "Atención", floodCritical: "Crítico",
+    airGood: "Buena", airModerate: "Moderada", airPoor: "Mala", airHazardous: "Peligrosa",
   },
 };
 
-const weatherCodes: Record<number, { label: string; icon: string }> = {
-  0: { label: "Céu limpo", icon: "☀️" }, 1: { label: "Predominante limpo", icon: "🌤️" },
-  2: { label: "Parcialmente nublado", icon: "⛅" }, 3: { label: "Nublado", icon: "☁️" },
-  45: { label: "Neblina", icon: "🌫️" }, 51: { label: "Garoa leve", icon: "🌦️" },
-  61: { label: "Chuva leve", icon: "🌧️" }, 63: { label: "Chuva moderada", icon: "🌧️" },
-  65: { label: "Chuva intensa", icon: "🌧️" }, 71: { label: "Neve leve", icon: "🌨️" },
-  80: { label: "Pancadas de chuva", icon: "⛈️" }, 95: { label: "Tempestade", icon: "⛈️" },
-  99: { label: "Tempestade severa", icon: "🌩️" },
-};
-
-const quakeColor = (mag: number) => mag >= 7 ? "#ef4444" : mag >= 5 ? "#f97316" : mag >= 3 ? "#f59e0b" : "#22c55e";
-const quakeRadius = (mag: number) => Math.max(6, mag * 5);
-
 export default function MapModule({ lang }: MapProps) {
   const l = labels[lang];
-  const mapRef         = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markerRef      = useRef<L.Marker | null>(null);
-  const clickMarkerRef = useRef<L.Marker | null>(null);
-  const quakeLayerRef  = useRef<L.LayerGroup | null>(null);
-  const fireLayerRef   = useRef<L.LayerGroup | null>(null);
-  const inpeLayerRef   = useRef<L.LayerGroup | null>(null);
+  const mapRef          = useRef<HTMLDivElement>(null);
+  const mapInstanceRef  = useRef<L.Map | null>(null);
+  const markerRef       = useRef<L.Marker | null>(null);
+  const clickMarkerRef  = useRef<L.Marker | null>(null);
+  const quakeLayerRef   = useRef<L.LayerGroup | null>(null);
+  const fireLayerRef    = useRef<L.LayerGroup | null>(null);
+  const inpeLayerRef    = useRef<L.LayerGroup | null>(null);
 
   const [query, setQuery]                       = useState("");
   const [results, setResults]                   = useState<Location[]>([]);
   const [loading, setLoading]                   = useState(false);
   const [noResults, setNoResults]               = useState(false);
   const [fullscreen, setFullscreen]             = useState(false);
-  const [weather, setWeather]                   = useState<Weather | null>(null);
+  const [weather, setWeather]                   = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading]     = useState(false);
   const [showWeatherPopup, setShowWeatherPopup] = useState(false);
   const [quake, setQuake]                       = useState<{ mag: number; place: string; time: number; lat: number; lon: number; depth: number } | null>(null);
@@ -119,126 +127,116 @@ export default function MapModule({ lang }: MapProps) {
   const [inpeLoading, setInpeLoading]           = useState(true);
   const [inpePop, setInpePop]                   = useState<{ lat: number; lon: number; municipio: string; estado: string; bioma: string } | null>(null);
   const [showInpePopup, setShowInpePopup]       = useState(false);
+  const [flood, setFlood]                       = useState<FloodFeature | null>(null);
+  const [showFloodPopup, setShowFloodPopup]     = useState(false);
+  const [air, setAir]                           = useState<AirQualityFeature | null>(null);
+  const [showAirPopup, setShowAirPopup]         = useState(false);
+  const [airLoading, setAirLoading]             = useState(false);
 
   const closeAllPopups = () => {
     setShowWeatherPopup(false);
     setShowQuakePopup(false);
     setShowFirePopup(false);
     setShowInpePopup(false);
+    setShowFloodPopup(false);
+    setShowAirPopup(false);
   };
 
-  const fetchWeather = async (lat: number, lon: number, cityName?: string) => {
-    setWeatherLoading(true);
+  const handleMapClick = async (lat: number, lng: number) => {
+    if (clickMarkerRef.current) clickMarkerRef.current.remove();
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const clickIcon = L.divIcon({
+      html: `<div style="width:14px;height:14px;background:#06b6d4;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(6,182,212,0.9)"></div>`,
+      iconSize: [14, 14], iconAnchor: [7, 7], className: "",
+    });
+    clickMarkerRef.current = L.marker([lat, lng], { icon: clickIcon }).addTo(map);
+
+    let cityName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    try {
+      const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const geoData = await geo.json();
+      cityName = geoData.address?.city || geoData.address?.town || geoData.address?.village || geoData.address?.county || geoData.display_name?.split(",")[0] || cityName;
+    } catch (_) {}
+
     closeAllPopups();
     setShowWeatherPopup(true);
+    setWeatherLoading(true);
     setWeather(null);
-    try {
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=auto`);
-      const data = await res.json();
-      const c = data.current;
-      setWeather({ temperature: c.temperature_2m, windspeed: c.wind_speed_10m, humidity: c.relative_humidity_2m, precipitation: c.precipitation, weathercode: c.weather_code, city: cityName || `${lat.toFixed(4)}, ${lon.toFixed(4)}`, lat, lon });
-    } catch (e) { setShowWeatherPopup(false); }
+    const w = await fetchWeather(lat, lng, cityName);
+    setWeather(w);
     setWeatherLoading(false);
+
+    setAirLoading(true);
+    const a = await fetchAirQuality(lat, lng);
+    setAir(a);
+    setAirLoading(false);
+
+    const f = await fetchFloodData(lat, lng);
+    setFlood(f);
   };
 
-  const loadEarthquakes = async (map: L.Map) => {
+  const loadMapLayers = async (map: L.Map) => {
     setQuakeLoading(true);
-    try {
-      const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
-      const data = await res.json();
-      const layer = L.layerGroup().addTo(map);
-      quakeLayerRef.current = layer;
-      data.features.forEach((f: any) => {
-        const [lon, lat] = f.geometry.coordinates;
-        const mag = f.properties.mag;
-        const place = f.properties.place;
-        const time = f.properties.time;
-        const depth = f.geometry.coordinates[2];
-        if (!mag || mag < 1) return;
-        const circle = L.circleMarker([lat, lon], {
-          radius: quakeRadius(mag), fillColor: quakeColor(mag),
-          color: "#fff", weight: 1.5, opacity: 0.9, fillOpacity: 0.75,
-        }).addTo(layer);
-        circle.on("click", (e: L.LeafletMouseEvent) => {
-          L.DomEvent.stopPropagation(e);
-          closeAllPopups();
-          setQuake({ mag, place, time, lat, lon, depth });
-          setShowQuakePopup(true);
-        });
+    const quakes = await fetchEarthquakes();
+    const qLayer = L.layerGroup().addTo(map);
+    quakeLayerRef.current = qLayer;
+    quakes.forEach(q => {
+      const circle = L.circleMarker([q.lat, q.lon], {
+        radius: quakeRadius(q.mag), fillColor: quakeColor(q.mag),
+        color: "#fff", weight: 1.5, opacity: 0.9, fillOpacity: 0.75,
+      }).addTo(qLayer);
+      circle.on("click", (e: L.LeafletMouseEvent) => {
+        L.DomEvent.stopPropagation(e);
+        closeAllPopups();
+        setQuake(q);
+        setShowQuakePopup(true);
       });
-    } catch (e) {}
+    });
     setQuakeLoading(false);
-  };
 
-  const loadFires = async (map: L.Map) => {
     setFireLoading(true);
-    try {
-      const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${NASA_FIRMS_KEY}/VIIRS_SNPP_NRT/world/1`;
-      const res = await fetch(url);
-      const text = await res.text();
-      const lines = text.trim().split("\n").slice(1);
-      const layer = L.layerGroup().addTo(map);
-      fireLayerRef.current = layer;
-      lines.slice(0, 800).forEach((line: string) => {
-        const cols = line.split(",");
-        const lat = parseFloat(cols[0]);
-        const lon = parseFloat(cols[1]);
-        const brightness = parseFloat(cols[2]);
-        const confidence = cols[9] || "n/a";
-        if (isNaN(lat) || isNaN(lon)) return;
-        const circle = L.circleMarker([lat, lon], {
-          radius: 4, fillColor: "#ef4444",
-          color: "#f97316", weight: 1, opacity: 1, fillOpacity: 0.85,
-        }).addTo(layer);
-        circle.on("click", (e: L.LeafletMouseEvent) => {
-          L.DomEvent.stopPropagation(e);
-          closeAllPopups();
-          setFirePop({ lat, lon, brightness, confidence });
-          setShowFirePopup(true);
-        });
+    const fires = await fetchNasaFires();
+    const fLayer = L.layerGroup().addTo(map);
+    fireLayerRef.current = fLayer;
+    fires.forEach(f => {
+      const circle = L.circleMarker([f.lat, f.lon], {
+        radius: 4, fillColor: "#ef4444",
+        color: "#f97316", weight: 1, opacity: 1, fillOpacity: 0.85,
+      }).addTo(fLayer);
+      circle.on("click", (e: L.LeafletMouseEvent) => {
+        L.DomEvent.stopPropagation(e);
+        closeAllPopups();
+        setFirePop(f);
+        setShowFirePopup(true);
       });
-    } catch (e) {}
+    });
     setFireLoading(false);
-  };
 
-  const loadINPE = async (map: L.Map) => {
     setInpeLoading(true);
-    try {
-      const res = await fetch("https://queimadas.dgi.inpe.br/api/focos/?pais_id=33&quantidade=1000");
-      const data = await res.json();
-      const layer = L.layerGroup().addTo(map);
-      inpeLayerRef.current = layer;
-      data.forEach((f: any) => {
-        const lat = parseFloat(f.latitude);
-        const lon = parseFloat(f.longitude);
-        if (isNaN(lat) || isNaN(lon)) return;
-        // Amarelo diamante para diferenciar do NASA
-        const inpeIcon = L.divIcon({
-          html: `<div style="width:10px;height:10px;background:#f59e0b;border:1.5px solid #fff;border-radius:2px;transform:rotate(45deg);box-shadow:0 0 6px rgba(245,158,11,0.8)"></div>`,
-          iconSize: [10, 10], iconAnchor: [5, 5], className: ""
-        });
-        const marker = L.marker([lat, lon], { icon: inpeIcon }).addTo(layer);
-        marker.on("click", (e: L.LeafletMouseEvent) => {
-          L.DomEvent.stopPropagation(e);
-          closeAllPopups();
-          setInpePop({
-            lat, lon,
-            municipio: f.municipio || "—",
-            estado: f.estado || "—",
-            bioma: f.bioma || "—",
-          });
-          setShowInpePopup(true);
-        });
+    const inpe = await fetchInpeFires();
+    const iLayer = L.layerGroup().addTo(map);
+    inpeLayerRef.current = iLayer;
+    inpe.forEach(f => {
+      const inpeIcon = L.divIcon({
+        html: `<div style="width:10px;height:10px;background:#f59e0b;border:1.5px solid #fff;border-radius:2px;transform:rotate(45deg);box-shadow:0 0 6px rgba(245,158,11,0.8)"></div>`,
+        iconSize: [10, 10], iconAnchor: [5, 5], className: "",
       });
-    } catch (e) {}
+      const marker = L.marker([f.lat, f.lon], { icon: inpeIcon }).addTo(iLayer);
+      marker.on("click", (e: L.LeafletMouseEvent) => {
+        L.DomEvent.stopPropagation(e);
+        closeAllPopups();
+        setInpePop(f);
+        setShowInpePopup(true);
+      });
+    });
     setInpeLoading(false);
   };
 
   useEffect(() => {
     if (!document.getElementById("leaflet-css")) {
       const link = document.createElement("link");
-      link.id = "leaflet-css";
-      link.rel = "stylesheet";
+      link.id = "leaflet-css"; link.rel = "stylesheet";
       link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
       document.head.appendChild(link);
     }
@@ -248,30 +246,12 @@ export default function MapModule({ lang }: MapProps) {
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors", maxZoom: 19,
       }).addTo(map);
-
-      map.on("click", async (e: L.LeafletMouseEvent) => {
-        const { lat, lng } = e.latlng;
-        if (clickMarkerRef.current) clickMarkerRef.current.remove();
-        const clickIcon = L.divIcon({
-          html: `<div style="width:14px;height:14px;background:#06b6d4;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(6,182,212,0.9)"></div>`,
-          iconSize: [14, 14], iconAnchor: [7, 7], className: ""
-        });
-        clickMarkerRef.current = L.marker([lat, lng], { icon: clickIcon }).addTo(map);
-        let cityName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-        try {
-          const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-          const geoData = await geo.json();
-          cityName = geoData.address?.city || geoData.address?.town || geoData.address?.village || geoData.address?.county || geoData.display_name?.split(",")[0] || cityName;
-        } catch (_) {}
-        fetchWeather(lat, lng, cityName);
+      map.on("click", (e: L.LeafletMouseEvent) => {
+        handleMapClick(e.latlng.lat, e.latlng.lng);
       });
-
       mapInstanceRef.current = map;
-      loadEarthquakes(map);
-      loadFires(map);
-      loadINPE(map);
+      loadMapLayers(map);
     }, 100);
-
     return () => {
       clearTimeout(timer);
       if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
@@ -293,7 +273,7 @@ export default function MapModule({ lang }: MapProps) {
       const data = await res.json();
       if (data.length === 0) setNoResults(true);
       setResults(data);
-    } catch (e) { setNoResults(true); }
+    } catch { setNoResults(true); }
     setLoading(false);
   };
 
@@ -309,20 +289,24 @@ export default function MapModule({ lang }: MapProps) {
     map.flyTo([lat, lon], 10, { animate: true, duration: 1.5 });
     setResults([]);
     setQuery(loc.display_name.split(",")[0]);
-    fetchWeather(lat, lon, loc.display_name.split(",")[0]);
+    handleMapClick(lat, lon);
   };
 
-  const wInfo = weather ? (weatherCodes[weather.weathercode] || { label: "—", icon: "🌡️" }) : null;
-  const tempColor = weather ? (weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#3b82f6" : "#22c55e") : "#06b6d4";
+  const wInfo   = weather ? (weatherCodes[weather.weathercode] || { label: "—", icon: "🌡️" }) : null;
+  const tempColor = weather
+    ? weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#3b82f6" : "#22c55e"
+    : "#06b6d4";
   const quakeMagLabel = (mag: number) => mag >= 7 ? l.extreme : mag >= 5 ? l.high : mag >= 3 ? l.moderate : l.low;
+  const floodStatusLabel = (level: FloodFeature["level"]) =>
+    level === "critical" ? l.floodCritical : level === "attention" ? l.floodAttention : l.floodNormal;
+  const airLevelLabel = (level: AirQualityFeature["level"]) =>
+    level === "hazardous" ? l.airHazardous : level === "poor" ? l.airPoor : level === "moderate" ? l.airModerate : l.airGood;
 
   const popupBase: React.CSSProperties = {
     position: "absolute", bottom: 16, left: 16, zIndex: 999,
     width: "min(280px, calc(100vw - 32px))",
-    background: "rgba(6,14,34,0.97)",
-    borderRadius: 14, padding: 16,
-    backdropFilter: "blur(20px)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+    background: "rgba(6,14,34,0.97)", borderRadius: 14, padding: 16,
+    backdropFilter: "blur(20px)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
     animation: "slideIn 0.3s ease",
   };
 
@@ -352,7 +336,6 @@ export default function MapModule({ lang }: MapProps) {
         </button>
       </div>
 
-      {/* No results */}
       {noResults && (
         <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", display: "flex", alignItems: "center", gap: 10 }}>
           <AlertTriangle size={15} color="#ef4444" />
@@ -360,7 +343,6 @@ export default function MapModule({ lang }: MapProps) {
         </div>
       )}
 
-      {/* Results */}
       {results.length > 0 && (
         <div style={{ borderRadius: 12, background: "#0a1628", border: "1px solid #1a2744", overflow: "hidden" }}>
           <p style={{ fontSize: 11, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.1em", padding: "10px 14px", borderBottom: "1px solid #1a2744", margin: 0, fontWeight: 700 }}>{results.length} {l.results}</p>
@@ -385,23 +367,25 @@ export default function MapModule({ lang }: MapProps) {
         <span style={{ fontSize: 12, color: "#4a6080", flex: 1, minWidth: 100 }}>{l.clickHint}</span>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {quakeLoading ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.quakeLoading}</span> : <span style={{ fontSize: 11, color: "#f97316", fontWeight: 700 }}>{l.quakeLayer}</span>}
-          {fireLoading ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.fireLoading}</span> : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.fireLayer}</span>}
-          {inpeLoading ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.inpeLoading}</span> : <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>{l.inpeLayer}</span>}
+          {fireLoading  ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.fireLoading}</span>  : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.fireLayer}</span>}
+          {inpeLoading  ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.inpeLoading}</span>  : <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>{l.inpeLayer}</span>}
         </div>
       </div>
 
       {/* Legenda */}
-      <div style={{ display: "flex", gap: 14, padding: "10px 14px", borderRadius: 10, background: "#0a1628", border: "1px solid #1a2744", flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 12, padding: "10px 14px", borderRadius: 10, background: "#0a1628", border: "1px solid #1a2744", flexWrap: "wrap", alignItems: "center" }}>
         <span style={{ fontSize: 11, color: "#4a6080", fontWeight: 700, textTransform: "uppercase" }}>{l.legend}:</span>
-        <span style={{ fontSize: 11, color: "#06b6d4" }}>🔵 Meteorologia</span>
-        <span style={{ fontSize: 11, color: "#22c55e" }}>🟢 Terremoto M1-3</span>
-        <span style={{ fontSize: 11, color: "#f59e0b" }}>🟡 Terremoto M3-5</span>
-        <span style={{ fontSize: 11, color: "#f97316" }}>🟠 Terremoto M5-7</span>
-        <span style={{ fontSize: 11, color: "#ef4444" }}>🔴 Terremoto M7+ / NASA Fire</span>
-        <span style={{ fontSize: 11, color: "#f59e0b" }}>🔷 Queimada INPE Brasil</span>
+        <span style={{ fontSize: 11, color: "#06b6d4"  }}>🔵 Meteorologia</span>
+        <span style={{ fontSize: 11, color: "#22c55e"  }}>🟢 Terremoto M1-3</span>
+        <span style={{ fontSize: 11, color: "#f59e0b"  }}>🟡 Terremoto M3-5</span>
+        <span style={{ fontSize: 11, color: "#f97316"  }}>🟠 Terremoto M5-7</span>
+        <span style={{ fontSize: 11, color: "#ef4444"  }}>🔴 Terremoto M7+ / NASA Fire</span>
+        <span style={{ fontSize: 11, color: "#f59e0b"  }}>🔷 Queimada INPE</span>
+        <span style={{ fontSize: 11, color: "#3b82f6"  }}>💧 Enchente</span>
+        <span style={{ fontSize: 11, color: "#22c55e"  }}>🌿 Qualidade do Ar</span>
       </div>
 
-      {/* MAP */}
+      {/* MAP CONTAINER */}
       <div style={{ position: fullscreen ? "fixed" : "relative", top: fullscreen ? 0 : "auto", left: fullscreen ? 0 : "auto", width: fullscreen ? "100vw" : "100%", height: fullscreen ? "100vh" : "62vh", zIndex: fullscreen ? 9999 : 1, borderRadius: fullscreen ? 0 : 14, overflow: "hidden", border: "1px solid #1a2744" }}>
 
         <button onClick={() => setFullscreen(!fullscreen)}
@@ -426,25 +410,45 @@ export default function MapModule({ lang }: MapProps) {
             {weather && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #1a2744" }}><MapPin size={12} color="#06b6d4" /><span style={{ fontSize: 13, color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{weather.city}</span></div>}
             {weatherLoading && <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Loader size={15} color="#06b6d4" style={{ animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: "#4a6080" }}>{l.loading}</span></div>}
             {weather && !weatherLoading && (
-              <>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  {[
-                    { icon: Thermometer, label: l.temp,     value: `${weather.temperature}°C`,   color: tempColor },
-                    { icon: Wind,        label: l.wind,     value: `${weather.windspeed} km/h`,  color: "#8b5cf6" },
-                    { icon: Droplets,    label: l.humidity, value: `${weather.humidity}%`,       color: "#06b6d4" },
-                    { icon: Eye,         label: l.rain,     value: `${weather.precipitation}mm`, color: weather.precipitation > 5 ? "#ef4444" : "#22c55e" },
-                  ].map(({ icon: Icon, label, value, color }) => (
-                    <div key={label} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${color}20` }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Icon size={12} color={color} /><span style={{ fontSize: 10, color: "#4a6080", textTransform: "uppercase" }}>{label}</span></div>
-                      <p style={{ fontSize: 18, fontWeight: 900, color, fontFamily: "monospace", margin: 0 }}>{value}</p>
-                    </div>
-                  ))}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {[
+                  { icon: Thermometer, label: l.temp,     value: `${weather.temperature}°C`,   color: tempColor },
+                  { icon: Wind,        label: l.wind,     value: `${weather.windspeed} km/h`,  color: "#8b5cf6" },
+                  { icon: Droplets,    label: l.humidity, value: `${weather.humidity}%`,       color: "#06b6d4" },
+                  { icon: Eye,         label: l.rain,     value: `${weather.precipitation}mm`, color: weather.precipitation > 5 ? "#ef4444" : "#22c55e" },
+                ].map(({ icon: Icon, label, value, color }) => (
+                  <div key={label} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${color}20` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Icon size={12} color={color} /><span style={{ fontSize: 10, color: "#4a6080", textTransform: "uppercase" }}>{label}</span></div>
+                    <p style={{ fontSize: 18, fontWeight: 900, color, fontFamily: "monospace", margin: 0 }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Air quality mini dentro do weather popup */}
+            {air && !airLoading && (
+              <div style={{ marginTop: 10, padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${airQualityColor(air.level)}30` }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 10, color: "#4a6080", textTransform: "uppercase" }}>{l.airTitle}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: airQualityColor(air.level) }}>{airLevelLabel(air.level)}</span>
                 </div>
-                <div style={{ display: "flex", gap: 16, marginTop: 12, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
-                  <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{weather.lat.toFixed(4)}</p></div>
-                  <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{weather.lon.toFixed(4)}</p></div>
+                <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>AQI <strong style={{ color: airQualityColor(air.level) }}>{air.aqi}</strong></span>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>PM2.5 <strong style={{ color: "#fff" }}>{air.pm25.toFixed(1)}</strong></span>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>PM10 <strong style={{ color: "#fff" }}>{air.pm10.toFixed(1)}</strong></span>
                 </div>
-              </>
+              </div>
+            )}
+            {/* Flood mini dentro do weather popup */}
+            {flood && (
+              <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${floodColor(flood.level)}30` }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 10, color: "#4a6080", textTransform: "uppercase" }}>{l.floodTitle}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: floodColor(flood.level) }}>{floodStatusLabel(flood.level)}</span>
+                </div>
+                <span style={{ fontSize: 11, color: "#94a3b8", marginTop: 4, display: "block" }}>
+                  {l.floodDischarge}: <strong style={{ color: floodColor(flood.level) }}>{flood.discharge.toFixed(0)} m³/s</strong>
+                </span>
+              </div>
             )}
           </div>
         )}
@@ -508,8 +512,8 @@ export default function MapModule({ lang }: MapProps) {
               </div>
             </div>
             <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
-              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lat.toFixed(3)}</p></div>
-              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lon.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lat.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lon.toFixed(3)}</p></div>
             </div>
           </div>
         )}
@@ -544,8 +548,8 @@ export default function MapModule({ lang }: MapProps) {
               </div>
             </div>
             <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
-              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{inpePop.lat.toFixed(3)}</p></div>
-              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{inpePop.lon.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{inpePop.lat.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{inpePop.lon.toFixed(3)}</p></div>
             </div>
           </div>
         )}
@@ -586,11 +590,45 @@ export default function MapModule({ lang }: MapProps) {
               ))}
             </div>
           )}
+          {/* Painel Qualidade do Ar */}
+          {air && !airLoading && (
+            <div style={{ marginTop: 12, padding: "14px 16px", borderRadius: 10, background: "#060e22", border: `1px solid ${airQualityColor(air.level)}30` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <WindIcon size={13} color={airQualityColor(air.level)} />
+                <span style={{ fontSize: 11, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.08em" }}>{l.airTitle}</span>
+                <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: airQualityColor(air.level) }}>{airLevelLabel(air.level)}</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                {[
+                  { label: l.airAqi,  value: air.aqi.toString(),       color: airQualityColor(air.level) },
+                  { label: l.airPm25, value: air.pm25.toFixed(1),      color: "#06b6d4" },
+                  { label: l.airPm10, value: air.pm10.toFixed(1),      color: "#8b5cf6" },
+                ].map(({ label, value, color }) => (
+                  <div key={label} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: `1px solid ${color}20` }}>
+                    <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>{label}</p>
+                    <p style={{ fontSize: 20, fontWeight: 900, color, fontFamily: "monospace", margin: 0 }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Painel Enchentes */}
+          {flood && (
+            <div style={{ marginTop: 10, padding: "14px 16px", borderRadius: 10, background: "#060e22", border: `1px solid ${floodColor(flood.level)}30` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Droplets size={13} color={floodColor(flood.level)} />
+                <span style={{ fontSize: 11, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.08em" }}>{l.floodTitle}</span>
+                <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: floodColor(flood.level) }}>{floodStatusLabel(flood.level)}</span>
+              </div>
+              <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>{l.floodDischarge}</p>
+              <p style={{ fontSize: 22, fontWeight: 900, color: floodColor(flood.level), fontFamily: "monospace", margin: 0 }}>{flood.discharge.toFixed(0)} m³/s</p>
+            </div>
+          )}
         </div>
       )}
 
       <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spin    { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         input::placeholder { color: #4a6080; }
         .leaflet-container { background: #050d1f !important; font-family: Arial, sans-serif; }
