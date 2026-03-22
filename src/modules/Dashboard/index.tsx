@@ -1,7 +1,16 @@
-import { AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap, Search, ChevronRight, Loader } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap, Search, ChevronRight, Loader, Navigation } from "lucide-react";
 import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
 
 interface DashboardProps {
   lang: Lang;
@@ -15,18 +24,31 @@ interface Location {
 }
 
 const mapLabels = {
-  pt: { searchPlaceholder: "Buscar localização no mapa...", searching: "Buscando...", search: "BUSCAR" },
-  en: { searchPlaceholder: "Search location on map...", searching: "Searching...", search: "SEARCH" },
-  es: { searchPlaceholder: "Buscar ubicación en el mapa...", searching: "Buscando...", search: "BUSCAR" },
+  pt: { placeholder: "Buscar localização no mapa...", searching: "Buscando...", search: "BUSCAR" },
+  en: { placeholder: "Search location on map...", searching: "Searching...", search: "SEARCH" },
+  es: { placeholder: "Buscar ubicación en el mapa...", searching: "Buscando...", search: "BUSCAR" },
 };
 
 export default function Dashboard({ lang }: DashboardProps) {
   const t = T[lang];
   const l = mapLabels[lang];
+  const mapRef         = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markerRef      = useRef<L.Marker | null>(null);
+
   const [query, setQuery]     = useState("");
   const [results, setResults] = useState<Location[]>([]);
   const [loading, setLoading] = useState(false);
-  const [mapUrl, setMapUrl]   = useState("https://www.openstreetmap.org/export/embed.html?bbox=-180,-85,180,85&layer=mapnik");
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+    const map = L.map(mapRef.current, { center: [0, 0], zoom: 2, zoomControl: true });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors", maxZoom: 19,
+    }).addTo(map);
+    mapInstanceRef.current = map;
+    return () => { map.remove(); mapInstanceRef.current = null; };
+  }, []);
 
   const search = async () => {
     if (!query.trim()) return;
@@ -46,9 +68,13 @@ export default function Dashboard({ lang }: DashboardProps) {
   const selectLocation = (loc: Location) => {
     const lat = parseFloat(loc.lat);
     const lon = parseFloat(loc.lon);
-    const delta = 0.8;
-    const bbox = `${lon - delta},${lat - delta},${lon + delta},${lat + delta}`;
-    setMapUrl(`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik`);
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    if (markerRef.current) markerRef.current.remove();
+    const marker = L.marker([lat, lon]).addTo(map);
+    marker.bindPopup(`<strong>${loc.display_name.split(",")[0]}</strong>`).openPopup();
+    markerRef.current = marker;
+    map.flyTo([lat, lon], 15, { animate: true, duration: 1.2 });
     setResults([]);
     setQuery(loc.display_name.split(",")[0]);
   };
@@ -118,7 +144,7 @@ export default function Dashboard({ lang }: DashboardProps) {
         </div>
       </div>
 
-      {/* MAP — GRANDE */}
+      {/* MAP */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: 16, borderRadius: 14, background: "linear-gradient(135deg, #0a1628, #060e22)", border: "1px solid #1a2744" }}>
         <div style={{ display: "flex", gap: 10 }}>
           <div style={{ flex: 1, position: "relative" }}>
@@ -127,14 +153,14 @@ export default function Dashboard({ lang }: DashboardProps) {
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === "Enter" && search()}
-              placeholder={l.searchPlaceholder}
+              placeholder={l.placeholder}
               style={{ width: "100%", padding: "10px 12px 10px 36px", borderRadius: 8, background: "#060e22", border: "1px solid #1a2744", color: "#fff", fontSize: 13, outline: "none", boxSizing: "border-box" }}
             />
           </div>
           <button onClick={search} disabled={loading}
-            style={{ padding: "10px 20px", borderRadius: 8, background: "linear-gradient(135deg, #06b6d4, #3b82f6)", border: "none", color: "#fff", fontSize: 12, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: loading ? 0.7 : 1 }}
+            style={{ padding: "10px 20px", borderRadius: 8, background: "linear-gradient(135deg, #ef4444, #f97316)", border: "none", color: "#fff", fontSize: 12, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? <Loader size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Search size={14} />}
+            {loading ? <Loader size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Navigation size={14} />}
             {loading ? l.searching : l.search}
           </button>
         </div>
@@ -158,20 +184,17 @@ export default function Dashboard({ lang }: DashboardProps) {
           </div>
         )}
 
-        <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid #1a2744" }}>
-          <iframe
-            src={mapUrl}
-            width="100%"
-            height="600"
-            style={{ border: "none", display: "block", filter: "invert(90%) hue-rotate(180deg)" }}
-            title="SENTRIX Map Dashboard"
-          />
-        </div>
+        <div ref={mapRef} style={{ height: "55vh", borderRadius: 10, overflow: "hidden", border: "1px solid #1a2744", zIndex: 1 }} />
       </div>
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         input::placeholder { color: #4a6080; }
+        .leaflet-container { background: #050d1f !important; }
+        .leaflet-tile { filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+        .leaflet-control-attribution { background: rgba(6,14,34,0.9) !important; color: #4a6080 !important; }
+        .leaflet-control-attribution a { color: #06b6d4 !important; }
+        .leaflet-control-zoom a { background: #0a1628 !important; color: #fff !important; border-color: #1a2744 !important; }
       `}</style>
     </div>
   );
