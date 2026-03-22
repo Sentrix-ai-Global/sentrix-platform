@@ -51,6 +51,17 @@ export interface WeatherData {
   lon: number;
 }
 
+export interface GdacsEvent {
+  lat: number;
+  lon: number;
+  title: string;
+  type: string;
+  alertLevel: "green" | "orange" | "red";
+  country: string;
+  date: string;
+  url: string;
+}
+
 export async function fetchEarthquakes(): Promise<EarthquakeFeature[]> {
   try {
     const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
@@ -112,6 +123,66 @@ export async function fetchInpeFires(): Promise<InpeFeature[]> {
   }
 }
 
+export async function fetchGdacsEvents(): Promise<GdacsEvent[]> {
+  try {
+    const res = await fetch(
+      "https://www.gdacs.org/xml/rss.xml",
+      { headers: { "Accept": "application/rss+xml, application/xml, text/xml" } }
+    );
+    const text = await res.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "text/xml");
+    const items = Array.from(xml.querySelectorAll("item"));
+
+    return items.slice(0, 50).reduce<GdacsEvent[]>((acc, item) => {
+      try {
+        const title   = item.querySelector("title")?.textContent || "—";
+        const link    = item.querySelector("link")?.textContent  || "";
+        const pubDate = item.querySelector("pubDate")?.textContent || "";
+
+        const geoLat = item.getElementsByTagNameNS("*", "lat")[0]?.textContent
+          || item.querySelector("geo\\:lat, lat")?.textContent || "";
+        const geoLon = item.getElementsByTagNameNS("*", "long")[0]?.textContent
+          || item.querySelector("geo\\:long, long")?.textContent || "";
+
+        const lat = parseFloat(geoLat);
+        const lon = parseFloat(geoLon);
+        if (isNaN(lat) || isNaN(lon)) return acc;
+
+        const alertLevelRaw = item.getElementsByTagNameNS("*", "alertlevel")[0]?.textContent?.toLowerCase()
+          || item.querySelector("gdacs\\:alertlevel, alertlevel")?.textContent?.toLowerCase()
+          || "green";
+
+        const alertLevel: GdacsEvent["alertLevel"] =
+          alertLevelRaw === "red" ? "red" : alertLevelRaw === "orange" ? "orange" : "green";
+
+        const eventType = item.getElementsByTagNameNS("*", "eventtype")[0]?.textContent
+          || item.querySelector("gdacs\\:eventtype, eventtype")?.textContent
+          || "—";
+
+        const country = item.getElementsByTagNameNS("*", "country")[0]?.textContent
+          || item.querySelector("gdacs\\:country, country")?.textContent
+          || "—";
+
+        acc.push({
+          lat, lon,
+          title: title.trim(),
+          type: eventType.trim(),
+          alertLevel,
+          country: country.trim(),
+          date: pubDate.trim(),
+          url: link.trim(),
+        });
+      } catch {
+        // item malformado — ignora
+      }
+      return acc;
+    }, []);
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchFloodData(lat: number, lon: number): Promise<FloodFeature | null> {
   try {
     const res = await fetch(
@@ -134,9 +205,9 @@ export async function fetchAirQuality(lat: number, lon: number): Promise<AirQual
     );
     const data = await res.json();
     const c = data.current;
-    const aqi: number = c.european_aqi ?? 0;
-    const pm25: number = c.pm2_5 ?? 0;
-    const pm10: number = c.pm10 ?? 0;
+    const aqi: number   = c.european_aqi ?? 0;
+    const pm25: number  = c.pm2_5 ?? 0;
+    const pm10: number  = c.pm10  ?? 0;
     const level: AirQualityFeature["level"] =
       aqi > 100 ? "hazardous" : aqi > 50 ? "poor" : aqi > 25 ? "moderate" : "good";
     return { lat, lon, aqi, pm25, pm10, level };
@@ -154,8 +225,8 @@ export async function fetchWeather(lat: number, lon: number, cityName?: string):
     const c = data.current;
     return {
       temperature: c.temperature_2m,
-      windspeed: c.wind_speed_10m,
-      humidity: c.relative_humidity_2m,
+      windspeed:   c.wind_speed_10m,
+      humidity:    c.relative_humidity_2m,
       precipitation: c.precipitation,
       weathercode: c.weather_code,
       city: cityName || `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
@@ -182,18 +253,23 @@ export const floodColor = (level: FloodFeature["level"]): string => {
   return map[level];
 };
 
+export const gdacsColor = (level: GdacsEvent["alertLevel"]): string => {
+  const map = { green: "#22c55e", orange: "#f97316", red: "#ef4444" };
+  return map[level];
+};
+
 export const weatherCodes: Record<number, { label: string; icon: string }> = {
-  0:  { label: "Céu limpo",           icon: "☀️"  },
-  1:  { label: "Predominante limpo",  icon: "🌤️" },
-  2:  { label: "Parcialmente nublado",icon: "⛅"  },
-  3:  { label: "Nublado",             icon: "☁️"  },
-  45: { label: "Neblina",             icon: "🌫️" },
-  51: { label: "Garoa leve",          icon: "🌦️" },
-  61: { label: "Chuva leve",          icon: "🌧️" },
-  63: { label: "Chuva moderada",      icon: "🌧️" },
-  65: { label: "Chuva intensa",       icon: "🌧️" },
-  71: { label: "Neve leve",           icon: "🌨️" },
-  80: { label: "Pancadas de chuva",   icon: "⛈️" },
-  95: { label: "Tempestade",          icon: "⛈️" },
-  99: { label: "Tempestade severa",   icon: "🌩️" },
+  0:  { label: "Céu limpo",            icon: "☀️"  },
+  1:  { label: "Predominante limpo",   icon: "🌤️" },
+  2:  { label: "Parcialmente nublado", icon: "⛅"  },
+  3:  { label: "Nublado",              icon: "☁️"  },
+  45: { label: "Neblina",              icon: "🌫️" },
+  51: { label: "Garoa leve",           icon: "🌦️" },
+  61: { label: "Chuva leve",           icon: "🌧️" },
+  63: { label: "Chuva moderada",       icon: "🌧️" },
+  65: { label: "Chuva intensa",        icon: "🌧️" },
+  71: { label: "Neve leve",            icon: "🌨️" },
+  80: { label: "Pancadas de chuva",    icon: "⛈️" },
+  95: { label: "Tempestade",           icon: "⛈️" },
+  99: { label: "Tempestade severa",    icon: "🌩️" },
 };
