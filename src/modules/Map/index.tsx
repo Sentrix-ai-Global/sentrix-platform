@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity, Flame, Wind as WindIcon } from "lucide-react";
+import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity, Flame } from "lucide-react";
 import type { Lang } from "../../types";
 import L from "leaflet";
 import {
-  fetchEarthquakes, fetchNasaFires, fetchInpeFires,
+  fetchEarthquakes, fetchNasaFires, fetchInpeFires, fetchGdacsEvents,
   fetchFloodData, fetchAirQuality, fetchWeather,
-  quakeColor, quakeRadius, airQualityColor, floodColor, weatherCodes,
-  type WeatherData, type FloodFeature, type AirQualityFeature,
+  quakeColor, quakeRadius, airQualityColor, floodColor, gdacsColor, weatherCodes,
+  type WeatherData, type FloodFeature, type AirQualityFeature, type GdacsEvent,
 } from "../../services/mapServices";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -22,7 +22,7 @@ interface Location { display_name: string; lat: string; lon: string; place_id: n
 const labels = {
   pt: {
     title: "MAPA INTELIGENTE",
-    subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • Queimadas INPE • Enchentes • Qualidade do Ar",
+    subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • INPE • Enchentes • Ar • GDACS ONU",
     placeholder: "Digite país, estado, cidade, rua ou endereço...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
     lat: "Lat", lon: "Lon", noResults: "Nenhum resultado encontrado.",
@@ -32,23 +32,24 @@ const labels = {
     loading: "Carregando...",
     clickHint: "🌐 Clique no mapa para dados ao vivo",
     quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitude", quakeDepth: "Profundidade", quakeTime: "Horário",
-    quakeLayer: "🟠 TERREMOTOS AO VIVO", quakeLoading: "Carregando terremotos...",
-    fireTitle: "INCÊNDIO — NASA FIRMS", fireLayer: "🔴 INCÊNDIOS NASA",
+    quakeLayer: "🟠 TERREMOTOS", quakeLoading: "Carregando terremotos...",
+    fireTitle: "INCÊNDIO — NASA FIRMS", fireLayer: "🔴 NASA FIRMS",
     fireLoading: "Carregando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confiança",
-    inpeTitle: "QUEIMADA — INPE BRASIL", inpeLayer: "🟡 QUEIMADAS INPE",
+    inpeTitle: "QUEIMADA — INPE BRASIL", inpeLayer: "🟡 INPE",
     inpeLoading: "Carregando INPE...", inpeMunicipality: "Município", inpeState: "Estado",
-    floodTitle: "ENCHENTE — OPEN-METEO", floodLayer: "🔵 ENCHENTES", floodLoading: "Analisando rios...",
-    floodDischarge: "Descarga (m³/s)", floodStatus: "Status do Rio",
-    airTitle: "QUALIDADE DO AR", airLayer: "🟢 QUALIDADE DO AR", airLoading: "Carregando ar...",
-    airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
+    floodTitle: "ENCHENTE — OPEN-METEO", floodDischarge: "Descarga (m³/s)", floodStatus: "Status do Rio",
+    airTitle: "QUALIDADE DO AR", airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
+    gdacsTitle: "DESASTRE — GDACS ONU", gdacsLayer: "🔷 GDACS ONU", gdacsLoading: "Carregando ONU...",
+    gdacsType: "Tipo", gdacsCountry: "País", gdacsAlert: "Nível ONU", gdacsDate: "Data",
     low: "Baixo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
     legend: "LEGENDA",
     floodNormal: "Normal", floodAttention: "Atenção", floodCritical: "Crítico",
     airGood: "Boa", airModerate: "Moderada", airPoor: "Ruim", airHazardous: "Perigosa",
+    gdacsGreen: "Verde", gdacsOrange: "Laranja", gdacsRed: "Vermelho",
   },
   en: {
     title: "SMART MAP",
-    subtitle: "Weather • USGS Earthquakes • NASA Fires • INPE Brazil • Floods • Air Quality",
+    subtitle: "Weather • USGS Earthquakes • NASA Fires • INPE • Floods • Air • GDACS UN",
     placeholder: "Type country, state, city, street or address...",
     searching: "Searching...", search: "SEARCH", results: "RESULTS",
     lat: "Lat", lon: "Lon", noResults: "No results found.",
@@ -58,23 +59,24 @@ const labels = {
     loading: "Loading...",
     clickHint: "🌐 Click map for live data",
     quakeTitle: "EARTHQUAKE — USGS", quakeMag: "Magnitude", quakeDepth: "Depth", quakeTime: "Time",
-    quakeLayer: "🟠 LIVE EARTHQUAKES", quakeLoading: "Loading earthquakes...",
-    fireTitle: "FIRE — NASA FIRMS", fireLayer: "🔴 NASA FIRES",
+    quakeLayer: "🟠 EARTHQUAKES", quakeLoading: "Loading earthquakes...",
+    fireTitle: "FIRE — NASA FIRMS", fireLayer: "🔴 NASA FIRMS",
     fireLoading: "Loading NASA...", fireBrightness: "Temperature", fireConfidence: "Confidence",
-    inpeTitle: "FIRE — INPE BRAZIL", inpeLayer: "🟡 INPE FIRES",
+    inpeTitle: "FIRE — INPE BRAZIL", inpeLayer: "🟡 INPE",
     inpeLoading: "Loading INPE...", inpeMunicipality: "Municipality", inpeState: "State",
-    floodTitle: "FLOOD — OPEN-METEO", floodLayer: "🔵 FLOODS", floodLoading: "Analyzing rivers...",
-    floodDischarge: "Discharge (m³/s)", floodStatus: "River Status",
-    airTitle: "AIR QUALITY", airLayer: "🟢 AIR QUALITY", airLoading: "Loading air...",
-    airAqi: "AQI Index", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
-    low: "Low", moderate: "Moderate", high: "High", extreme: "Extreme",
+    floodTitle: "FLOOD — OPEN-METEO", floodDischarge: "Discharge (m³/s)", floodStatus: "River Status",
+    airTitle: "AIR QUALITY", airAqi: "AQI Index", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
+    gdacsTitle: "DISASTER — GDACS UN", gdacsLayer: "🔷 GDACS UN", gdacsLoading: "Loading UN...",
+    gdacsType: "Type", gdacsCountry: "Country", gdacsAlert: "UN Level", gdacsDate: "Date",
+    low: "Low", moderate: "Moderate", high: "Alto", extreme: "Extreme",
     legend: "LEGEND",
     floodNormal: "Normal", floodAttention: "Attention", floodCritical: "Critical",
     airGood: "Good", airModerate: "Moderate", airPoor: "Poor", airHazardous: "Hazardous",
+    gdacsGreen: "Green", gdacsOrange: "Orange", gdacsRed: "Red",
   },
   es: {
     title: "MAPA INTELIGENTE",
-    subtitle: "Meteorología • Terremotos USGS • Incendios NASA • INPE Brasil • Inundaciones • Calidad del Aire",
+    subtitle: "Meteorología • Terremotos USGS • Incendios NASA • INPE • Inundaciones • Aire • GDACS ONU",
     placeholder: "Escriba país, estado, ciudad, calle o dirección...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
     lat: "Lat", lon: "Lon", noResults: "Sin resultados.",
@@ -84,31 +86,33 @@ const labels = {
     loading: "Cargando...",
     clickHint: "🌐 Clic en el mapa para datos en vivo",
     quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitud", quakeDepth: "Profundidad", quakeTime: "Hora",
-    quakeLayer: "🟠 TERREMOTOS EN VIVO", quakeLoading: "Cargando terremotos...",
-    fireTitle: "INCENDIO — NASA FIRMS", fireLayer: "🔴 INCENDIOS NASA",
+    quakeLayer: "🟠 TERREMOTOS", quakeLoading: "Cargando terremotos...",
+    fireTitle: "INCENDIO — NASA FIRMS", fireLayer: "🔴 NASA FIRMS",
     fireLoading: "Cargando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confianza",
-    inpeTitle: "INCENDIO — INPE BRASIL", inpeLayer: "🟡 QUEIMADAS INPE",
+    inpeTitle: "INCENDIO — INPE BRASIL", inpeLayer: "🟡 INPE",
     inpeLoading: "Cargando INPE...", inpeMunicipality: "Municipio", inpeState: "Estado",
-    floodTitle: "INUNDACIÓN — OPEN-METEO", floodLayer: "🔵 INUNDACIONES", floodLoading: "Analizando ríos...",
-    floodDischarge: "Descarga (m³/s)", floodStatus: "Estado del Río",
-    airTitle: "CALIDAD DEL AIRE", airLayer: "🟢 CALIDAD DEL AIRE", airLoading: "Cargando aire...",
-    airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
+    floodTitle: "INUNDACIÓN — OPEN-METEO", floodDischarge: "Descarga (m³/s)", floodStatus: "Estado del Río",
+    airTitle: "CALIDAD DEL AIRE", airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
+    gdacsTitle: "DESASTRE — GDACS ONU", gdacsLayer: "🔷 GDACS ONU", gdacsLoading: "Cargando ONU...",
+    gdacsType: "Tipo", gdacsCountry: "País", gdacsAlert: "Nivel ONU", gdacsDate: "Fecha",
     low: "Bajo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
     legend: "LEYENDA",
     floodNormal: "Normal", floodAttention: "Atención", floodCritical: "Crítico",
     airGood: "Buena", airModerate: "Moderada", airPoor: "Mala", airHazardous: "Peligrosa",
+    gdacsGreen: "Verde", gdacsOrange: "Naranja", gdacsRed: "Rojo",
   },
 };
 
 export default function MapModule({ lang }: MapProps) {
   const l = labels[lang];
-  const mapRef          = useRef<HTMLDivElement>(null);
-  const mapInstanceRef  = useRef<L.Map | null>(null);
-  const markerRef       = useRef<L.Marker | null>(null);
-  const clickMarkerRef  = useRef<L.Marker | null>(null);
-  const quakeLayerRef   = useRef<L.LayerGroup | null>(null);
-  const fireLayerRef    = useRef<L.LayerGroup | null>(null);
-  const inpeLayerRef    = useRef<L.LayerGroup | null>(null);
+  const mapRef         = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markerRef      = useRef<L.Marker | null>(null);
+  const clickMarkerRef = useRef<L.Marker | null>(null);
+  const quakeLayerRef  = useRef<L.LayerGroup | null>(null);
+  const fireLayerRef   = useRef<L.LayerGroup | null>(null);
+  const inpeLayerRef   = useRef<L.LayerGroup | null>(null);
+  const gdacsLayerRef  = useRef<L.LayerGroup | null>(null);
 
   const [query, setQuery]                       = useState("");
   const [results, setResults]                   = useState<Location[]>([]);
@@ -128,18 +132,18 @@ export default function MapModule({ lang }: MapProps) {
   const [inpePop, setInpePop]                   = useState<{ lat: number; lon: number; municipio: string; estado: string; bioma: string } | null>(null);
   const [showInpePopup, setShowInpePopup]       = useState(false);
   const [flood, setFlood]                       = useState<FloodFeature | null>(null);
-  const [showFloodPopup, setShowFloodPopup]     = useState(false);
   const [air, setAir]                           = useState<AirQualityFeature | null>(null);
-  const [showAirPopup, setShowAirPopup]         = useState(false);
   const [airLoading, setAirLoading]             = useState(false);
+  const [gdacsLoading, setGdacsLoading]         = useState(true);
+  const [gdacsPop, setGdacsPop]                 = useState<GdacsEvent | null>(null);
+  const [showGdacsPopup, setShowGdacsPopup]     = useState(false);
 
   const closeAllPopups = () => {
     setShowWeatherPopup(false);
     setShowQuakePopup(false);
     setShowFirePopup(false);
     setShowInpePopup(false);
-    setShowFloodPopup(false);
-    setShowAirPopup(false);
+    setShowGdacsPopup(false);
   };
 
   const handleMapClick = async (lat: number, lng: number) => {
@@ -177,6 +181,7 @@ export default function MapModule({ lang }: MapProps) {
   };
 
   const loadMapLayers = async (map: L.Map) => {
+    // Terremotos
     setQuakeLoading(true);
     const quakes = await fetchEarthquakes();
     const qLayer = L.layerGroup().addTo(map);
@@ -195,6 +200,7 @@ export default function MapModule({ lang }: MapProps) {
     });
     setQuakeLoading(false);
 
+    // NASA FIRMS
     setFireLoading(true);
     const fires = await fetchNasaFires();
     const fLayer = L.layerGroup().addTo(map);
@@ -213,6 +219,7 @@ export default function MapModule({ lang }: MapProps) {
     });
     setFireLoading(false);
 
+    // INPE
     setInpeLoading(true);
     const inpe = await fetchInpeFires();
     const iLayer = L.layerGroup().addTo(map);
@@ -231,6 +238,27 @@ export default function MapModule({ lang }: MapProps) {
       });
     });
     setInpeLoading(false);
+
+    // GDACS ONU
+    setGdacsLoading(true);
+    const gdacs = await fetchGdacsEvents();
+    const gLayer = L.layerGroup().addTo(map);
+    gdacsLayerRef.current = gLayer;
+    gdacs.forEach(g => {
+      const color = gdacsColor(g.alertLevel);
+      const gdacsIcon = L.divIcon({
+        html: `<div style="width:14px;height:14px;background:${color};border:2px solid #fff;border-radius:3px;box-shadow:0 0 8px ${color}99;transform:rotate(45deg)"></div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7], className: "",
+      });
+      const marker = L.marker([g.lat, g.lon], { icon: gdacsIcon }).addTo(gLayer);
+      marker.on("click", (e: L.LeafletMouseEvent) => {
+        L.DomEvent.stopPropagation(e);
+        closeAllPopups();
+        setGdacsPop(g);
+        setShowGdacsPopup(true);
+      });
+    });
+    setGdacsLoading(false);
   };
 
   useEffect(() => {
@@ -292,15 +320,17 @@ export default function MapModule({ lang }: MapProps) {
     handleMapClick(lat, lon);
   };
 
-  const wInfo   = weather ? (weatherCodes[weather.weathercode] || { label: "—", icon: "🌡️" }) : null;
+  const wInfo     = weather ? (weatherCodes[weather.weathercode] || { label: "—", icon: "🌡️" }) : null;
   const tempColor = weather
     ? weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#3b82f6" : "#22c55e"
     : "#06b6d4";
-  const quakeMagLabel = (mag: number) => mag >= 7 ? l.extreme : mag >= 5 ? l.high : mag >= 3 ? l.moderate : l.low;
+  const quakeMagLabel   = (mag: number) => mag >= 7 ? l.extreme : mag >= 5 ? l.high : mag >= 3 ? l.moderate : l.low;
   const floodStatusLabel = (level: FloodFeature["level"]) =>
     level === "critical" ? l.floodCritical : level === "attention" ? l.floodAttention : l.floodNormal;
-  const airLevelLabel = (level: AirQualityFeature["level"]) =>
+  const airLevelLabel   = (level: AirQualityFeature["level"]) =>
     level === "hazardous" ? l.airHazardous : level === "poor" ? l.airPoor : level === "moderate" ? l.airModerate : l.airGood;
+  const gdacsAlertLabel = (level: GdacsEvent["alertLevel"]) =>
+    level === "red" ? l.gdacsRed : level === "orange" ? l.gdacsOrange : l.gdacsGreen;
 
   const popupBase: React.CSSProperties = {
     position: "absolute", bottom: 16, left: 16, zIndex: 999,
@@ -317,7 +347,7 @@ export default function MapModule({ lang }: MapProps) {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
           <div style={{ width: 4, height: 36, background: "linear-gradient(180deg, #06b6d4, #3b82f6)", borderRadius: 2 }} />
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: 0 }}>{l.title}</h1>
+          <h1 style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 900, color: "#fff", margin: 0 }}>{l.title}</h1>
         </div>
         <p style={{ fontSize: 12, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.08em", marginLeft: 16 }}>{l.subtitle}</p>
       </div>
@@ -366,23 +396,24 @@ export default function MapModule({ lang }: MapProps) {
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", flexWrap: "wrap" }}>
         <span style={{ fontSize: 12, color: "#4a6080", flex: 1, minWidth: 100 }}>{l.clickHint}</span>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {quakeLoading ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.quakeLoading}</span> : <span style={{ fontSize: 11, color: "#f97316", fontWeight: 700 }}>{l.quakeLayer}</span>}
-          {fireLoading  ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.fireLoading}</span>  : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.fireLayer}</span>}
-          {inpeLoading  ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.inpeLoading}</span>  : <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>{l.inpeLayer}</span>}
+          {quakeLoading  ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.quakeLoading}</span>  : <span style={{ fontSize: 11, color: "#f97316", fontWeight: 700 }}>{l.quakeLayer}</span>}
+          {fireLoading   ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.fireLoading}</span>   : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.fireLayer}</span>}
+          {inpeLoading   ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.inpeLoading}</span>   : <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>{l.inpeLayer}</span>}
+          {gdacsLoading  ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.gdacsLoading}</span>  : <span style={{ fontSize: 11, color: "#3b82f6", fontWeight: 700 }}>{l.gdacsLayer}</span>}
         </div>
       </div>
 
       {/* Legenda */}
       <div style={{ display: "flex", gap: 12, padding: "10px 14px", borderRadius: 10, background: "#0a1628", border: "1px solid #1a2744", flexWrap: "wrap", alignItems: "center" }}>
         <span style={{ fontSize: 11, color: "#4a6080", fontWeight: 700, textTransform: "uppercase" }}>{l.legend}:</span>
-        <span style={{ fontSize: 11, color: "#06b6d4"  }}>🔵 Meteorologia</span>
         <span style={{ fontSize: 11, color: "#22c55e"  }}>🟢 Terremoto M1-3</span>
         <span style={{ fontSize: 11, color: "#f59e0b"  }}>🟡 Terremoto M3-5</span>
         <span style={{ fontSize: 11, color: "#f97316"  }}>🟠 Terremoto M5-7</span>
-        <span style={{ fontSize: 11, color: "#ef4444"  }}>🔴 Terremoto M7+ / NASA Fire</span>
-        <span style={{ fontSize: 11, color: "#f59e0b"  }}>🔷 Queimada INPE</span>
-        <span style={{ fontSize: 11, color: "#3b82f6"  }}>💧 Enchente</span>
-        <span style={{ fontSize: 11, color: "#22c55e"  }}>🌿 Qualidade do Ar</span>
+        <span style={{ fontSize: 11, color: "#ef4444"  }}>🔴 M7+ / NASA Fire</span>
+        <span style={{ fontSize: 11, color: "#f59e0b"  }}>🔷 INPE</span>
+        <span style={{ fontSize: 11, color: "#22c55e"  }}>🔷 GDACS Verde</span>
+        <span style={{ fontSize: 11, color: "#f97316"  }}>🔷 GDACS Laranja</span>
+        <span style={{ fontSize: 11, color: "#ef4444"  }}>🔷 GDACS Vermelho</span>
       </div>
 
       {/* MAP CONTAINER */}
@@ -424,7 +455,6 @@ export default function MapModule({ lang }: MapProps) {
                 ))}
               </div>
             )}
-            {/* Air quality mini dentro do weather popup */}
             {air && !airLoading && (
               <div style={{ marginTop: 10, padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${airQualityColor(air.level)}30` }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -438,7 +468,6 @@ export default function MapModule({ lang }: MapProps) {
                 </div>
               </div>
             )}
-            {/* Flood mini dentro do weather popup */}
             {flood && (
               <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${floodColor(flood.level)}30` }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -481,9 +510,9 @@ export default function MapModule({ lang }: MapProps) {
               </div>
             </div>
             <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
-              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{quake.lat.toFixed(3)}</p></div>
-              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{quake.lon.toFixed(3)}</p></div>
-              <div style={{ marginLeft: "auto" }}><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.quakeTime}</p><p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>{new Date(quake.time).toLocaleTimeString()}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{quake.lat.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{quake.lon.toFixed(3)}</p></div>
+              <div style={{ marginLeft: "auto" }}><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.quakeTime}</p><p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>{new Date(quake.time).toLocaleTimeString()}</p></div>
             </div>
           </div>
         )}
@@ -554,6 +583,44 @@ export default function MapModule({ lang }: MapProps) {
           </div>
         )}
 
+        {/* GDACS POPUP */}
+        {showGdacsPopup && gdacsPop && (
+          <div style={{ ...popupBase, border: `1px solid ${gdacsColor(gdacsPop.alertLevel)}70` }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 18 }}>🌐</span>
+                <div>
+                  <p style={{ fontSize: 12, color: gdacsColor(gdacsPop.alertLevel), fontWeight: 900, textTransform: "uppercase", margin: 0 }}>{l.gdacsTitle}</p>
+                  <p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>GDACS — United Nations</p>
+                </div>
+              </div>
+              <button onClick={() => setShowGdacsPopup(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex" }}><X size={14} /></button>
+            </div>
+            <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${gdacsColor(gdacsPop.alertLevel)}30`, marginBottom: 10 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1.4 }}>{gdacsPop.title}</p>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+              <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: `1px solid ${gdacsColor(gdacsPop.alertLevel)}30` }}>
+                <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>{l.gdacsAlert}</p>
+                <p style={{ fontSize: 14, fontWeight: 900, color: gdacsColor(gdacsPop.alertLevel), margin: 0 }}>{gdacsAlertLabel(gdacsPop.alertLevel)}</p>
+              </div>
+              <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(139,92,246,0.3)" }}>
+                <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>{l.gdacsType}</p>
+                <p style={{ fontSize: 14, fontWeight: 900, color: "#8b5cf6", margin: 0 }}>{gdacsPop.type}</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+              <MapPin size={12} color="#4a6080" />
+              <span style={{ fontSize: 13, color: "#94a3b8" }}>{gdacsPop.country}</span>
+            </div>
+            <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{gdacsPop.lat.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{gdacsPop.lon.toFixed(3)}</p></div>
+              <div style={{ marginLeft: "auto" }}><p style={{ fontSize: 10, color: "#2a3a54", margin: 0 }}>{l.gdacsDate}</p><p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>{new Date(gdacsPop.date).toLocaleDateString()}</p></div>
+            </div>
+          </div>
+        )}
+
         <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
       </div>
 
@@ -566,14 +633,14 @@ export default function MapModule({ lang }: MapProps) {
             {wInfo && <span style={{ fontSize: 18 }}>{wInfo.icon}</span>}
             {wInfo && <span style={{ fontSize: 12, color: "#94a3b8" }}>{wInfo.label}</span>}
             {weather && <div style={{ marginLeft: "auto", display: "flex", gap: 14 }}>
-              <div><p style={{ fontSize: 10, color: "#4a6080", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#06b6d4", fontFamily: "monospace", fontWeight: 700, margin: 0 }}>{weather.lat.toFixed(4)}</p></div>
-              <div><p style={{ fontSize: 10, color: "#4a6080", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#06b6d4", fontFamily: "monospace", fontWeight: 700, margin: 0 }}>{weather.lon.toFixed(4)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#4a6080", margin: 0 }}>{l.lat}</p><p style={{ fontSize: 11, color: "#06b6d4", fontFamily: "monospace", fontWeight: 700, margin: 0 }}>{weather.lat.toFixed(4)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#4a6080", margin: 0 }}>{l.lon}</p><p style={{ fontSize: 11, color: "#06b6d4", fontFamily: "monospace", fontWeight: 700, margin: 0 }}>{weather.lon.toFixed(4)}</p></div>
             </div>}
           </div>
           {weather && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}><MapPin size={13} color="#06b6d4" /><span style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>{weather.city}</span></div>}
           {weatherLoading && <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Loader size={16} color="#06b6d4" style={{ animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: "#4a6080" }}>{l.loading}</span></div>}
           {weather && !weatherLoading && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
               {[
                 { icon: Thermometer, label: l.temp,     value: `${weather.temperature}°C`,   color: tempColor,   sub: weather.temperature > 35 ? "🔴 Extremo" : weather.temperature > 25 ? "🟡 Quente" : weather.temperature < 5 ? "🔵 Frio" : "🟢 Agradável" },
                 { icon: Wind,        label: l.wind,     value: `${weather.windspeed} km/h`,  color: "#8b5cf6",   sub: weather.windspeed > 50 ? "🔴 Forte" : weather.windspeed > 20 ? "🟡 Moderado" : "🟢 Fraco" },
@@ -590,19 +657,18 @@ export default function MapModule({ lang }: MapProps) {
               ))}
             </div>
           )}
-          {/* Painel Qualidade do Ar */}
           {air && !airLoading && (
             <div style={{ marginTop: 12, padding: "14px 16px", borderRadius: 10, background: "#060e22", border: `1px solid ${airQualityColor(air.level)}30` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <WindIcon size={13} color={airQualityColor(air.level)} />
+                <Wind size={13} color={airQualityColor(air.level)} />
                 <span style={{ fontSize: 11, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.08em" }}>{l.airTitle}</span>
                 <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: airQualityColor(air.level) }}>{airLevelLabel(air.level)}</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                 {[
-                  { label: l.airAqi,  value: air.aqi.toString(),       color: airQualityColor(air.level) },
-                  { label: l.airPm25, value: air.pm25.toFixed(1),      color: "#06b6d4" },
-                  { label: l.airPm10, value: air.pm10.toFixed(1),      color: "#8b5cf6" },
+                  { label: l.airAqi,  value: air.aqi.toString(),  color: airQualityColor(air.level) },
+                  { label: l.airPm25, value: air.pm25.toFixed(1), color: "#06b6d4" },
+                  { label: l.airPm10, value: air.pm10.toFixed(1), color: "#8b5cf6" },
                 ].map(({ label, value, color }) => (
                   <div key={label} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: `1px solid ${color}20` }}>
                     <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>{label}</p>
@@ -612,7 +678,6 @@ export default function MapModule({ lang }: MapProps) {
               </div>
             </div>
           )}
-          {/* Painel Enchentes */}
           {flood && (
             <div style={{ marginTop: 10, padding: "14px 16px", borderRadius: 10, background: "#060e22", border: `1px solid ${floodColor(flood.level)}30` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
