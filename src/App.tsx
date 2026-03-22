@@ -9,6 +9,7 @@ import Dashboard    from "./modules/Dashboard";
 import AIPredictive from "./modules/AI";
 import AlertSystem  from "./modules/Alerts";
 import Disasters    from "./modules/Disasters";
+import MapModule    from "./modules/Map";
 import Placeholder  from "./modules/Placeholder";
 
 import type { Lang } from "./types";
@@ -24,6 +25,7 @@ export default function App() {
       case "ai":        return <AIPredictive lang={lang} />;
       case "alerts":    return <AlertSystem  lang={lang} />;
       case "disasters": return <Disasters    lang={lang} />;
+      case "map":       return <MapModule    lang={lang} />;
       default:          return <Placeholder  lang={lang} moduleId={module} />;
     }
   };
