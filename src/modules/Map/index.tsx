@@ -18,55 +18,64 @@ interface Weather { temperature: number; windspeed: number; humidity: number; pr
 
 const labels = {
   pt: {
-    title: "MAPA INTELIGENTE", subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • Tempo real",
+    title: "MAPA INTELIGENTE", subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • Queimadas INPE",
     placeholder: "Digite país, estado, cidade, rua ou endereço...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
-    lat: "Lat", lon: "Lon", noResults: "Nenhum resultado. Tente ser mais específico.",
+    lat: "Lat", lon: "Lon", noResults: "Nenhum resultado encontrado.",
     expand: "TELA CHEIA", collapse: "MINIMIZAR",
     weatherTitle: "METEOROLOGIA", weatherFull: "DADOS METEOROLÓGICOS EM TEMPO REAL",
     temp: "Temp.", wind: "Vento", humidity: "Umidade", rain: "Chuva",
     loading: "Carregando...",
-    clickHint: "🌍 Clique no mapa • 🟠 Terremotos USGS • 🔥 Incêndios NASA",
+    clickHint: "🌍 Clique no mapa • 🟠 Terremotos USGS • 🔴 NASA FIRMS • 🟡 Queimadas INPE",
     quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitude", quakeDepth: "Profundidade",
     quakeTime: "Horário", quakeLayer: "🟠 TERREMOTOS AO VIVO",
     quakeLoading: "Carregando terremotos...",
-    fireTitle: "INCÊNDIO — NASA FIRMS", fireLayer: "🔥 INCÊNDIOS NASA AO VIVO",
-    fireLoading: "Carregando incêndios...", fireBrightness: "Temperatura", fireConfidence: "Confiança",
+    fireTitle: "INCÊNDIO — NASA FIRMS", fireLayer: "🔴 INCÊNDIOS NASA",
+    fireLoading: "Carregando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confiança",
+    inpeTitle: "QUEIMADA — INPE BRASIL", inpeLayer: "🟡 QUEIMADAS INPE",
+    inpeLoading: "Carregando INPE...", inpeMunicipality: "Município", inpeState: "Estado",
     low: "Baixo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
+    legend: "LEGENDA",
   },
   en: {
-    title: "SMART MAP", subtitle: "Weather • USGS Earthquakes • NASA Fires • Real-time",
+    title: "SMART MAP", subtitle: "Weather • USGS Earthquakes • NASA Fires • INPE Brazil Fires",
     placeholder: "Type country, state, city, street or address...",
     searching: "Searching...", search: "SEARCH", results: "RESULTS",
-    lat: "Lat", lon: "Lon", noResults: "No results. Try to be more specific.",
+    lat: "Lat", lon: "Lon", noResults: "No results found.",
     expand: "FULL SCREEN", collapse: "MINIMIZE",
     weatherTitle: "WEATHER", weatherFull: "REAL-TIME WEATHER DATA",
     temp: "Temp.", wind: "Wind", humidity: "Humidity", rain: "Rain",
     loading: "Loading...",
-    clickHint: "🌍 Click map • 🟠 USGS Earthquakes • 🔥 NASA Fires",
+    clickHint: "🌍 Click map • 🟠 USGS Earthquakes • 🔴 NASA FIRMS • 🟡 INPE Fires",
     quakeTitle: "EARTHQUAKE — USGS", quakeMag: "Magnitude", quakeDepth: "Depth",
     quakeTime: "Time", quakeLayer: "🟠 LIVE EARTHQUAKES",
     quakeLoading: "Loading earthquakes...",
-    fireTitle: "FIRE — NASA FIRMS", fireLayer: "🔥 NASA LIVE FIRES",
-    fireLoading: "Loading fires...", fireBrightness: "Temperature", fireConfidence: "Confidence",
+    fireTitle: "FIRE — NASA FIRMS", fireLayer: "🔴 NASA FIRES",
+    fireLoading: "Loading NASA...", fireBrightness: "Temperature", fireConfidence: "Confidence",
+    inpeTitle: "FIRE — INPE BRAZIL", inpeLayer: "🟡 INPE FIRES",
+    inpeLoading: "Loading INPE...", inpeMunicipality: "Municipality", inpeState: "State",
     low: "Low", moderate: "Moderate", high: "High", extreme: "Extreme",
+    legend: "LEGEND",
   },
   es: {
-    title: "MAPA INTELIGENTE", subtitle: "Meteorología • Terremotos USGS • Incendios NASA • Tiempo real",
+    title: "MAPA INTELIGENTE", subtitle: "Meteorología • Terremotos USGS • Incendios NASA • Queimadas INPE",
     placeholder: "Escriba país, estado, ciudad, calle o dirección...",
     searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
-    lat: "Lat", lon: "Lon", noResults: "Sin resultados. Intente ser más específico.",
+    lat: "Lat", lon: "Lon", noResults: "Sin resultados.",
     expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR",
     weatherTitle: "METEOROLOGÍA", weatherFull: "DATOS METEOROLÓGICOS EN TIEMPO REAL",
     temp: "Temp.", wind: "Viento", humidity: "Humedad", rain: "Lluvia",
     loading: "Cargando...",
-    clickHint: "🌍 Clic en el mapa • 🟠 Terremotos USGS • 🔥 Incendios NASA",
+    clickHint: "🌍 Clic en el mapa • 🟠 Terremotos USGS • 🔴 NASA FIRMS • 🟡 INPE Brasil",
     quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitud", quakeDepth: "Profundidad",
     quakeTime: "Hora", quakeLayer: "🟠 TERREMOTOS EN VIVO",
     quakeLoading: "Cargando terremotos...",
-    fireTitle: "INCENDIO — NASA FIRMS", fireLayer: "🔥 INCENDIOS NASA EN VIVO",
-    fireLoading: "Cargando incendios...", fireBrightness: "Temperatura", fireConfidence: "Confianza",
+    fireTitle: "INCENDIO — NASA FIRMS", fireLayer: "🔴 INCENDIOS NASA",
+    fireLoading: "Cargando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confianza",
+    inpeTitle: "INCENDIO — INPE BRASIL", inpeLayer: "🟡 QUEIMADAS INPE",
+    inpeLoading: "Cargando INPE...", inpeMunicipality: "Municipio", inpeState: "Estado",
     low: "Bajo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
+    legend: "LEYENDA",
   },
 };
 
@@ -91,6 +100,7 @@ export default function MapModule({ lang }: MapProps) {
   const clickMarkerRef = useRef<L.Marker | null>(null);
   const quakeLayerRef  = useRef<L.LayerGroup | null>(null);
   const fireLayerRef   = useRef<L.LayerGroup | null>(null);
+  const inpeLayerRef   = useRef<L.LayerGroup | null>(null);
 
   const [query, setQuery]                       = useState("");
   const [results, setResults]                   = useState<Location[]>([]);
@@ -106,12 +116,21 @@ export default function MapModule({ lang }: MapProps) {
   const [fireLoading, setFireLoading]           = useState(true);
   const [firePop, setFirePop]                   = useState<{ lat: number; lon: number; brightness: number; confidence: string } | null>(null);
   const [showFirePopup, setShowFirePopup]       = useState(false);
+  const [inpeLoading, setInpeLoading]           = useState(true);
+  const [inpePop, setInpePop]                   = useState<{ lat: number; lon: number; municipio: string; estado: string; bioma: string } | null>(null);
+  const [showInpePopup, setShowInpePopup]       = useState(false);
+
+  const closeAllPopups = () => {
+    setShowWeatherPopup(false);
+    setShowQuakePopup(false);
+    setShowFirePopup(false);
+    setShowInpePopup(false);
+  };
 
   const fetchWeather = async (lat: number, lon: number, cityName?: string) => {
     setWeatherLoading(true);
+    closeAllPopups();
     setShowWeatherPopup(true);
-    setShowQuakePopup(false);
-    setShowFirePopup(false);
     setWeather(null);
     try {
       const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=auto`);
@@ -142,10 +161,9 @@ export default function MapModule({ lang }: MapProps) {
         }).addTo(layer);
         circle.on("click", (e: L.LeafletMouseEvent) => {
           L.DomEvent.stopPropagation(e);
+          closeAllPopups();
           setQuake({ mag, place, time, lat, lon, depth });
           setShowQuakePopup(true);
-          setShowWeatherPopup(false);
-          setShowFirePopup(false);
         });
       });
     } catch (e) {}
@@ -155,14 +173,12 @@ export default function MapModule({ lang }: MapProps) {
   const loadFires = async (map: L.Map) => {
     setFireLoading(true);
     try {
-      // NASA FIRMS API com chave oficial
       const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${NASA_FIRMS_KEY}/VIIRS_SNPP_NRT/world/1`;
       const res = await fetch(url);
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       const layer = L.layerGroup().addTo(map);
       fireLayerRef.current = layer;
-
       lines.slice(0, 800).forEach((line: string) => {
         const cols = line.split(",");
         const lat = parseFloat(cols[0]);
@@ -170,27 +186,52 @@ export default function MapModule({ lang }: MapProps) {
         const brightness = parseFloat(cols[2]);
         const confidence = cols[9] || "n/a";
         if (isNaN(lat) || isNaN(lon)) return;
-
-        // Círculo vermelho para incêndios — diferente dos terremotos
         const circle = L.circleMarker([lat, lon], {
-          radius: 5,
-          fillColor: "#ef4444",
-          color: "#f97316",
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.85,
+          radius: 4, fillColor: "#ef4444",
+          color: "#f97316", weight: 1, opacity: 1, fillOpacity: 0.85,
         }).addTo(layer);
-
         circle.on("click", (e: L.LeafletMouseEvent) => {
           L.DomEvent.stopPropagation(e);
+          closeAllPopups();
           setFirePop({ lat, lon, brightness, confidence });
           setShowFirePopup(true);
-          setShowQuakePopup(false);
-          setShowWeatherPopup(false);
         });
       });
     } catch (e) {}
     setFireLoading(false);
+  };
+
+  const loadINPE = async (map: L.Map) => {
+    setInpeLoading(true);
+    try {
+      const res = await fetch("https://queimadas.dgi.inpe.br/api/focos/?pais_id=33&quantidade=1000");
+      const data = await res.json();
+      const layer = L.layerGroup().addTo(map);
+      inpeLayerRef.current = layer;
+      data.forEach((f: any) => {
+        const lat = parseFloat(f.latitude);
+        const lon = parseFloat(f.longitude);
+        if (isNaN(lat) || isNaN(lon)) return;
+        // Amarelo diamante para diferenciar do NASA
+        const inpeIcon = L.divIcon({
+          html: `<div style="width:10px;height:10px;background:#f59e0b;border:1.5px solid #fff;border-radius:2px;transform:rotate(45deg);box-shadow:0 0 6px rgba(245,158,11,0.8)"></div>`,
+          iconSize: [10, 10], iconAnchor: [5, 5], className: ""
+        });
+        const marker = L.marker([lat, lon], { icon: inpeIcon }).addTo(layer);
+        marker.on("click", (e: L.LeafletMouseEvent) => {
+          L.DomEvent.stopPropagation(e);
+          closeAllPopups();
+          setInpePop({
+            lat, lon,
+            municipio: f.municipio || "—",
+            estado: f.estado || "—",
+            bioma: f.bioma || "—",
+          });
+          setShowInpePopup(true);
+        });
+      });
+    } catch (e) {}
+    setInpeLoading(false);
   };
 
   useEffect(() => {
@@ -228,6 +269,7 @@ export default function MapModule({ lang }: MapProps) {
       mapInstanceRef.current = map;
       loadEarthquakes(map);
       loadFires(map);
+      loadINPE(map);
     }, 100);
 
     return () => {
@@ -338,29 +380,25 @@ export default function MapModule({ lang }: MapProps) {
         </div>
       )}
 
-      {/* Legenda + status */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", flexWrap: "wrap" }}>
-        <span style={{ fontSize: 12, color: "#4a6080" }}>{l.clickHint}</span>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {quakeLoading
-            ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.quakeLoading}</span>
-            : <span style={{ fontSize: 11, color: "#f97316", fontWeight: 700 }}>{l.quakeLayer}</span>
-          }
-          {fireLoading
-            ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.fireLoading}</span>
-            : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.fireLayer}</span>
-          }
+      {/* Status bar */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", flexWrap: "wrap" }}>
+        <span style={{ fontSize: 12, color: "#4a6080", flex: 1, minWidth: 100 }}>{l.clickHint}</span>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {quakeLoading ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.quakeLoading}</span> : <span style={{ fontSize: 11, color: "#f97316", fontWeight: 700 }}>{l.quakeLayer}</span>}
+          {fireLoading ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.fireLoading}</span> : <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 700 }}>{l.fireLayer}</span>}
+          {inpeLoading ? <span style={{ fontSize: 11, color: "#f59e0b", display: "flex", alignItems: "center", gap: 4 }}><Loader size={10} style={{ animation: "spin 1s linear infinite" }} /> {l.inpeLoading}</span> : <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>{l.inpeLayer}</span>}
         </div>
       </div>
 
-      {/* Legenda de cores */}
-      <div style={{ display: "flex", gap: 16, padding: "10px 14px", borderRadius: 10, background: "#0a1628", border: "1px solid #1a2744", flexWrap: "wrap" }}>
-        <span style={{ fontSize: 11, color: "#4a6080", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>Legenda:</span>
-        <span style={{ fontSize: 11, color: "#06b6d4" }}>🔵 Clique = Meteorologia</span>
-        <span style={{ fontSize: 11, color: "#22c55e" }}>🟢 M1-3 Terremoto leve</span>
-        <span style={{ fontSize: 11, color: "#f59e0b" }}>🟡 M3-5 Moderado</span>
-        <span style={{ fontSize: 11, color: "#f97316" }}>🟠 M5-7 Alto</span>
-        <span style={{ fontSize: 11, color: "#ef4444" }}>🔴 M7+ Extremo • 🔴 Incêndio NASA</span>
+      {/* Legenda */}
+      <div style={{ display: "flex", gap: 14, padding: "10px 14px", borderRadius: 10, background: "#0a1628", border: "1px solid #1a2744", flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontSize: 11, color: "#4a6080", fontWeight: 700, textTransform: "uppercase" }}>{l.legend}:</span>
+        <span style={{ fontSize: 11, color: "#06b6d4" }}>🔵 Meteorologia</span>
+        <span style={{ fontSize: 11, color: "#22c55e" }}>🟢 Terremoto M1-3</span>
+        <span style={{ fontSize: 11, color: "#f59e0b" }}>🟡 Terremoto M3-5</span>
+        <span style={{ fontSize: 11, color: "#f97316" }}>🟠 Terremoto M5-7</span>
+        <span style={{ fontSize: 11, color: "#ef4444" }}>🔴 Terremoto M7+ / NASA Fire</span>
+        <span style={{ fontSize: 11, color: "#f59e0b" }}>🔷 Queimada INPE Brasil</span>
       </div>
 
       {/* MAP */}
@@ -472,6 +510,42 @@ export default function MapModule({ lang }: MapProps) {
             <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
               <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lat.toFixed(3)}</p></div>
               <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{firePop.lon.toFixed(3)}</p></div>
+            </div>
+          </div>
+        )}
+
+        {/* INPE POPUP */}
+        {showInpePopup && inpePop && (
+          <div style={{ ...popupBase, border: "1px solid rgba(245,158,11,0.6)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 18 }}>🔥</span>
+                <div>
+                  <p style={{ fontSize: 12, color: "#f59e0b", fontWeight: 900, textTransform: "uppercase", margin: 0 }}>{l.inpeTitle}</p>
+                  <p style={{ fontSize: 11, color: "#4a6080", margin: 0 }}>BDQueimadas — INPE</p>
+                </div>
+              </div>
+              <button onClick={() => setShowInpePopup(false)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #1a2744", borderRadius: 6, color: "#4a6080", cursor: "pointer", padding: "4px 6px", display: "flex" }}><X size={14} /></button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+              <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(245,158,11,0.3)" }}>
+                <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>{l.inpeMunicipality}</p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: "#fff", margin: 0 }}>{inpePop.municipio}</p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                  <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>{l.inpeState}</p>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b", margin: 0 }}>{inpePop.estado}</p>
+                </div>
+                <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                  <p style={{ fontSize: 10, color: "#4a6080", margin: "0 0 4px", textTransform: "uppercase" }}>Bioma</p>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b", margin: 0 }}>{inpePop.bioma}</p>
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: "1px solid #1a2744" }}>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lat}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{inpePop.lat.toFixed(3)}</p></div>
+              <div><p style={{ fontSize: 10, color: "#2a3a54", margin: 0, textTransform: "uppercase" }}>{l.lon}</p><p style={{ fontSize: 11, color: "#4a6080", fontFamily: "monospace", margin: 0 }}>{inpePop.lon.toFixed(3)}</p></div>
             </div>
           </div>
         )}
