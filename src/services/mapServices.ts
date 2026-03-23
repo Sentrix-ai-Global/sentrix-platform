@@ -44,13 +44,14 @@ export async function fetchNasaFires(): Promise<FireFeature[]> {
     const res = await fetch(url);
     const text = await res.text();
     const lines = text.trim().split("\n").slice(1);
-    return lines.slice(0, 800).reduce<FireFeature[]>((acc, line) => {
+    const result: FireFeature[] = [];
+    for (const line of lines.slice(0, 800)) {
       const cols = line.split(",");
       const lat = parseFloat(cols[0]), lon = parseFloat(cols[1]);
       const brightness = parseFloat(cols[2]), confidence = cols[9] || "n/a";
-      if (!isNaN(lat) && !isNaN(lon)) acc.push({ lat, lon, brightness, confidence });
-      return acc;
-    }, []);
+      if (!isNaN(lat) && !isNaN(lon)) result.push({ lat, lon, brightness, confidence });
+    }
+    return result;
   } catch { return []; }
 }
 
@@ -60,12 +61,13 @@ export async function fetchInpeFires(): Promise<InpeFeature[]> {
     const res = await fetch(`https://api.allorigins.win/get?url=${target}`);
     const wrapper = await res.json();
     const data = JSON.parse(wrapper.contents);
-    return data.reduce<InpeFeature[]>((acc: InpeFeature[], f: any) => {
+    const result: InpeFeature[] = [];
+    for (const f of data) {
       const lat = parseFloat(f.latitude), lon = parseFloat(f.longitude);
       if (!isNaN(lat) && !isNaN(lon))
-        acc.push({ lat, lon, municipio: f.municipio || "—", estado: f.estado || "—", bioma: f.bioma || "—" });
-      return acc;
-    }, []);
+        result.push({ lat, lon, municipio: f.municipio || "—", estado: f.estado || "—", bioma: f.bioma || "—" });
+    }
+    return result;
   } catch { return []; }
 }
 
@@ -77,7 +79,8 @@ export async function fetchGdacsEvents(): Promise<GdacsEvent[]> {
     const parser = new DOMParser();
     const xml = parser.parseFromString(wrapper.contents, "text/xml");
     const items = Array.from(xml.querySelectorAll("item"));
-    return items.slice(0, 50).reduce<GdacsEvent[]>((acc, item) => {
+    const result: GdacsEvent[] = [];
+    for (const item of items.slice(0, 50)) {
       try {
         const title   = item.querySelector("title")?.textContent || "—";
         const link    = item.querySelector("link")?.textContent  || "";
@@ -85,16 +88,16 @@ export async function fetchGdacsEvents(): Promise<GdacsEvent[]> {
         const geoLat  = item.getElementsByTagNameNS("*", "lat")[0]?.textContent || "";
         const geoLon  = item.getElementsByTagNameNS("*", "long")[0]?.textContent || "";
         const lat = parseFloat(geoLat), lon = parseFloat(geoLon);
-        if (isNaN(lat) || isNaN(lon)) return acc;
+        if (isNaN(lat) || isNaN(lon)) continue;
         const alertLevelRaw = item.getElementsByTagNameNS("*", "alertlevel")[0]?.textContent?.toLowerCase() || "green";
         const alertLevel: GdacsEvent["alertLevel"] =
           alertLevelRaw === "red" ? "red" : alertLevelRaw === "orange" ? "orange" : "green";
         const eventType = item.getElementsByTagNameNS("*", "eventtype")[0]?.textContent || "—";
         const country   = item.getElementsByTagNameNS("*", "country")[0]?.textContent   || "—";
-        acc.push({ lat, lon, title: title.trim(), type: eventType.trim(), alertLevel, country: country.trim(), date: pubDate.trim(), url: link.trim() });
-      } catch { }
-      return acc;
-    }, []);
+        result.push({ lat, lon, title: title.trim(), type: eventType.trim(), alertLevel, country: country.trim(), date: pubDate.trim(), url: link.trim() });
+      } catch { continue; }
+    }
+    return result;
   } catch { return []; }
 }
 
