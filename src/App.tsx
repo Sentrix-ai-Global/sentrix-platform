@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 import Sidebar from "./components/layout/Sidebar";
@@ -18,6 +18,14 @@ export default function App() {
   const [lang, setLang]         = useState<Lang>("pt");
   const [module, setModule]     = useState("dashboard");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mapMounted, setMapMounted] = useState(false);
+
+  // Monta o mapa na primeira vez que o usuário clica nele
+  useEffect(() => {
+    if (module === "map" && !mapMounted) {
+      setMapMounted(true);
+    }
+  }, [module]);
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", background: "#050d1f", overflow: "hidden" }}>
@@ -38,19 +46,28 @@ export default function App() {
       )}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 10, minWidth: 0 }}>
         <Header lang={lang} onMenuOpen={() => setMenuOpen(true)} />
-        <main style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+        <main style={{ flex: 1, overflow: "auto", padding: "24px", position: "relative" }}>
 
-          {/* Mapa sempre montado — só esconde com CSS para o Leaflet não quebrar */}
-          <div style={{ display: module === "map" ? "block" : "none" }}>
-            <MapModule lang={lang} />
-          </div>
-
+          {/* Módulos normais */}
           {module === "dashboard" && <Dashboard    lang={lang} />}
           {module === "ai"        && <AIPredictive lang={lang} />}
           {module === "alerts"    && <AlertSystem  lang={lang} />}
           {module === "disasters" && <Disasters    lang={lang} />}
           {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && (
             <Placeholder lang={lang} moduleId={module} />
+          )}
+
+          {/* Mapa: montado uma vez, nunca desmontado */}
+          {mapMounted && (
+            <div style={{
+              display: module === "map" ? "block" : "none",
+              position: module === "map" ? "relative" : "absolute",
+              top: 0, left: 0, width: "100%",
+              pointerEvents: module === "map" ? "auto" : "none",
+              zIndex: module === "map" ? 1 : -1,
+            }}>
+              <MapModule lang={lang} />
+            </div>
           )}
 
         </main>
