@@ -101,9 +101,9 @@ export default function MapModule({ lang }: MapProps) {
   const l = labels[lang];
   const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const mountedRef     = useRef(false);
   const markerRef      = useRef<L.Marker | null>(null);
   const clickMarkerRef = useRef<L.Marker | null>(null);
+  const activeRef      = useRef(true);
 
   const [query, setQuery]                       = useState("");
   const [results, setResults]                   = useState<Location[]>([]);
@@ -135,10 +135,10 @@ export default function MapModule({ lang }: MapProps) {
   };
 
   const handleMapClick = async (lat: number, lng: number) => {
-    if (!mountedRef.current) return;
-    if (clickMarkerRef.current) clickMarkerRef.current.remove();
+    if (!activeRef.current) return;
     const map = mapInstanceRef.current;
     if (!map) return;
+    if (clickMarkerRef.current) { clickMarkerRef.current.remove(); clickMarkerRef.current = null; }
     const clickIcon = L.divIcon({
       html: `<div style="width:14px;height:14px;background:#06b6d4;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(6,182,212,0.9)"></div>`,
       iconSize: [14, 14], iconAnchor: [7, 7], className: "",
@@ -153,18 +153,18 @@ export default function MapModule({ lang }: MapProps) {
     closeAllPopups();
     setShowWeatherPopup(true); setWeatherLoading(true); setWeather(null);
     const w = await fetchWeather(lat, lng, cityName);
-    if (mountedRef.current) { setWeather(w); setWeatherLoading(false); }
+    if (activeRef.current) { setWeather(w); setWeatherLoading(false); }
     setAirLoading(true);
     const a = await fetchAirQuality(lat, lng);
-    if (mountedRef.current) { setAir(a); setAirLoading(false); }
+    if (activeRef.current) { setAir(a); setAirLoading(false); }
     const f = await fetchFloodData(lat, lng);
-    if (mountedRef.current) setFlood(f);
+    if (activeRef.current) setFlood(f);
   };
 
   const loadMapLayers = async (map: L.Map) => {
     setQuakeLoading(true);
     const quakes = await fetchEarthquakes();
-    if (!mountedRef.current) return;
+    if (!activeRef.current) return;
     const qLayer = L.layerGroup().addTo(map);
     quakes.forEach(q => {
       const circle = L.circleMarker([q.lat, q.lon], {
@@ -179,7 +179,7 @@ export default function MapModule({ lang }: MapProps) {
 
     setFireLoading(true);
     const fires = await fetchNasaFires();
-    if (!mountedRef.current) return;
+    if (!activeRef.current) return;
     const fLayer = L.layerGroup().addTo(map);
     fires.forEach(f => {
       const circle = L.circleMarker([f.lat, f.lon], {
@@ -193,7 +193,7 @@ export default function MapModule({ lang }: MapProps) {
 
     setInpeLoading(true);
     const inpe = await fetchInpeFires();
-    if (!mountedRef.current) return;
+    if (!activeRef.current) return;
     const iLayer = L.layerGroup().addTo(map);
     inpe.forEach(f => {
       const inpeIcon = L.divIcon({
@@ -209,7 +209,7 @@ export default function MapModule({ lang }: MapProps) {
 
     setGdacsLoading(true);
     const gdacs = await fetchGdacsEvents();
-    if (!mountedRef.current) return;
+    if (!activeRef.current) return;
     const gLayer = L.layerGroup().addTo(map);
     gdacs.forEach(g => {
       const color = gdacsColor(g.alertLevel);
@@ -226,8 +226,7 @@ export default function MapModule({ lang }: MapProps) {
   };
 
   useEffect(() => {
-    if (mountedRef.current) return;
-    mountedRef.current = true;
+    activeRef.current = true;
 
     if (!document.getElementById("leaflet-css")) {
       const link = document.createElement("link");
@@ -245,11 +244,11 @@ export default function MapModule({ lang }: MapProps) {
       map.on("click", (e: L.LeafletMouseEvent) => handleMapClick(e.latlng.lat, e.latlng.lng));
       mapInstanceRef.current = map;
       loadMapLayers(map);
-    }, 150);
+    }, 200);
 
     return () => {
+      activeRef.current = false;
       clearTimeout(timer);
-      mountedRef.current = false;
       if (mapInstanceRef.current) {
         try { mapInstanceRef.current.remove(); } catch (_) {}
         mapInstanceRef.current = null;
