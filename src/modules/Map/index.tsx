@@ -249,10 +249,7 @@ export default function MapModule({ lang }: MapProps) {
     return () => {
       activeRef.current = false;
       clearTimeout(timer);
-      if (mapInstanceRef.current) {
-        try { mapInstanceRef.current.remove(); } catch (_) {}
-        mapInstanceRef.current = null;
-      }
+      // ✅ NÃO chamamos map.remove() — o Leaflet não suporta ser destruído e recriado
     };
   }, []);
 
