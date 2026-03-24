@@ -19,17 +19,6 @@ export default function App() {
   const [module, setModule]     = useState("dashboard");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const renderModule = () => {
-    switch (module) {
-      case "dashboard": return <Dashboard    lang={lang} />;
-      case "ai":        return <AIPredictive lang={lang} />;
-      case "alerts":    return <AlertSystem  lang={lang} />;
-      case "disasters": return <Disasters    lang={lang} />;
-      case "map":       return <MapModule    lang={lang} />;
-      default:          return <Placeholder  lang={lang} moduleId={module} />;
-    }
-  };
-
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", background: "#050d1f", overflow: "hidden" }}>
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, backgroundImage: "linear-gradient(rgba(249,115,22,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.025) 1px, transparent 1px)", backgroundSize: "50px 50px" }} />
@@ -50,7 +39,20 @@ export default function App() {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 10, minWidth: 0 }}>
         <Header lang={lang} onMenuOpen={() => setMenuOpen(true)} />
         <main style={{ flex: 1, overflow: "auto", padding: "24px" }}>
-          {renderModule()}
+
+          {/* Mapa sempre montado — só esconde com CSS para o Leaflet não quebrar */}
+          <div style={{ display: module === "map" ? "block" : "none" }}>
+            <MapModule lang={lang} />
+          </div>
+
+          {module === "dashboard" && <Dashboard    lang={lang} />}
+          {module === "ai"        && <AIPredictive lang={lang} />}
+          {module === "alerts"    && <AlertSystem  lang={lang} />}
+          {module === "disasters" && <Disasters    lang={lang} />}
+          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && (
+            <Placeholder lang={lang} moduleId={module} />
+          )}
+
         </main>
         <Footer lang={lang} />
       </div>
