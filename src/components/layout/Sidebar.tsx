@@ -1,4 +1,4 @@
-import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Shield } from "lucide-react";
+import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Shield, Activity } from "lucide-react";
 import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
 
@@ -11,18 +11,19 @@ interface SidebarProps {
 }
 
 const navItems = (t: typeof T.pt) => [
-  { id: "dashboard",  label: t.nav.dashboard,  icon: Shield,        badge: null },
-  { id: "map",        label: t.nav.map,         icon: Globe,         badge: null },
-  { id: "disasters",  label: t.nav.disasters,   icon: AlertTriangle, badge: 2    },
-  { id: "urban",      label: t.nav.urban,       icon: Building2,     badge: 5    },
-  { id: "ai",         label: t.nav.ai,          icon: Brain,         badge: null },
-  { id: "alerts",     label: t.nav.alertSystem, icon: Radio,         badge: 3    },
-  { id: "impact",     label: t.nav.impact,      icon: Heart,         badge: null },
-  { id: "data",       label: t.nav.data,        icon: Database,      badge: null },
-  { id: "automation", label: t.nav.automation,  icon: Bot,           badge: null },
-  { id: "tech",       label: t.nav.tech,        icon: Signal,        badge: null },
-  { id: "global",     label: t.nav.global,      icon: Globe,         badge: null },
-  { id: "reports",    label: t.nav.reports,     icon: FileText,      badge: null },
+  { id: "dashboard",   label: t.nav.dashboard,   icon: Shield,        badge: null },
+  { id: "map",         label: t.nav.map,          icon: Globe,         badge: null },
+  { id: "earthquakes", label: t.nav.earthquakes,  icon: Activity,      badge: null },
+  { id: "disasters",   label: t.nav.disasters,    icon: AlertTriangle, badge: 2    },
+  { id: "urban",       label: t.nav.urban,        icon: Building2,     badge: 5    },
+  { id: "ai",          label: t.nav.ai,           icon: Brain,         badge: null },
+  { id: "alerts",      label: t.nav.alertSystem,  icon: Radio,         badge: 3    },
+  { id: "impact",      label: t.nav.impact,       icon: Heart,         badge: null },
+  { id: "data",        label: t.nav.data,         icon: Database,      badge: null },
+  { id: "automation",  label: t.nav.automation,   icon: Bot,           badge: null },
+  { id: "tech",        label: t.nav.tech,         icon: Signal,        badge: null },
+  { id: "global",      label: t.nav.global,       icon: Globe,         badge: null },
+  { id: "reports",     label: t.nav.reports,      icon: FileText,      badge: null },
 ];
 
 export default function Sidebar({ lang, setLang, module, setModule, onClose }: SidebarProps) {
