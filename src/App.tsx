@@ -10,6 +10,7 @@ import AIPredictive from "./modules/AI";
 import AlertSystem  from "./modules/Alerts";
 import Disasters    from "./modules/Disasters";
 import MapModule    from "./modules/Map";
+import Earthquakes  from "./modules/Earthquakes";
 import Placeholder  from "./modules/Placeholder";
 
 import type { Lang } from "./types";
@@ -20,7 +21,6 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mapMounted, setMapMounted] = useState(false);
 
-  // Monta o mapa na primeira vez que o usuário clica nele
   useEffect(() => {
     if (module === "map" && !mapMounted) {
       setMapMounted(true);
@@ -48,16 +48,16 @@ export default function App() {
         <Header lang={lang} onMenuOpen={() => setMenuOpen(true)} />
         <main style={{ flex: 1, overflow: "auto", padding: "24px", position: "relative" }}>
 
-          {/* Módulos normais */}
-          {module === "dashboard" && <Dashboard    lang={lang} />}
-          {module === "ai"        && <AIPredictive lang={lang} />}
-          {module === "alerts"    && <AlertSystem  lang={lang} />}
-          {module === "disasters" && <Disasters    lang={lang} />}
-          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && (
+          {module === "dashboard"  && <Dashboard    lang={lang} />}
+          {module === "ai"         && <AIPredictive lang={lang} />}
+          {module === "alerts"     && <AlertSystem  lang={lang} />}
+          {module === "disasters"  && <Disasters    lang={lang} />}
+          {module === "earthquakes" && <Earthquakes lang={lang} />}
+
+          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && (
             <Placeholder lang={lang} moduleId={module} />
           )}
 
-          {/* Mapa: montado uma vez, nunca desmontado */}
           {mapMounted && (
             <div style={{
               display: module === "map" ? "block" : "none",
