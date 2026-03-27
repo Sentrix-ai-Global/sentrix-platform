@@ -165,7 +165,7 @@ export default function MapModule({ lang }: MapProps) {
       map.on("click", (e: L.LeafletMouseEvent) => handleMapClick(e.latlng.lat, e.latlng.lng));
       mapInstanceRef.current = map;
       loadMapLayers(map);
-    }, 200);
+    }, 500);
     return () => { activeRef.current = false; clearTimeout(timer); };
   }, []);
 

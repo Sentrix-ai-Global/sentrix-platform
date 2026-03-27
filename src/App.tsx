@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Sidebar from "./components/layout/Sidebar";
@@ -10,13 +9,14 @@ import AlertSystem  from "./modules/Alerts";
 import Disasters    from "./modules/Disasters";
 import MapModule    from "./modules/Map";
 import Earthquakes  from "./modules/Earthquakes";
+import Floods       from "./modules/Floods";
 import Placeholder  from "./modules/Placeholder";
 import type { Lang } from "./types";
 
 export default function App() {
-  const [lang, setLang]         = useState<Lang>("pt");
-  const [module, setModule]     = useState("dashboard");
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [lang, setLang]             = useState<Lang>("pt");
+  const [module, setModule]         = useState("dashboard");
+  const [menuOpen, setMenuOpen]     = useState(false);
   const [mapMounted, setMapMounted] = useState(false);
 
   useEffect(() => {
@@ -48,17 +48,12 @@ export default function App() {
           {module === "alerts"      && <AlertSystem  lang={lang} />}
           {module === "disasters"   && <Disasters    lang={lang} />}
           {module === "earthquakes" && <Earthquakes  lang={lang} />}
-          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && (
+          {module === "floods"      && <Floods       lang={lang} />}
+          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && module !== "floods" && (
             <Placeholder lang={lang} moduleId={module} />
           )}
           {mapMounted && (
-            <div style={{
-              display: module === "map" ? "block" : "none",
-              position: module === "map" ? "relative" : "absolute",
-              top: 0, left: 0, width: "100%",
-              pointerEvents: module === "map" ? "auto" : "none",
-              zIndex: module === "map" ? 1 : -1,
-            }}>
+            <div style={{ display: module === "map" ? "block" : "none", position: module === "map" ? "relative" : "absolute", top: 0, left: 0, width: "100%", pointerEvents: module === "map" ? "auto" : "none", zIndex: module === "map" ? 1 : -1 }}>
               <MapModule lang={lang} />
             </div>
           )}

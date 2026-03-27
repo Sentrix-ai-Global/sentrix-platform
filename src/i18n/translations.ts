@@ -30,9 +30,10 @@ export const T: Record<Lang, any> = {
     subtitle: "Monitoramento preditivo em tempo real • Estado de São Paulo",
     nav: {
       dashboard: "Painel Central", map: "Mapa Inteligente", earthquakes: "Terremotos",
-      disasters: "Catástrofes Naturais", urban: "Monitoramento Urbano", ai: "IA Preditiva",
-      alertSystem: "Sistema de Alertas", impact: "Impacto Social", data: "Integração de Dados",
-      automation: "Automação IA", tech: "Tecnologias", global: "Visão Global", reports: "Relatórios"
+      floods: "Enchentes", disasters: "Catástrofes Naturais", urban: "Monitoramento Urbano",
+      ai: "IA Preditiva", alertSystem: "Sistema de Alertas", impact: "Impacto Social",
+      data: "Integração de Dados", automation: "Automação IA", tech: "Tecnologias",
+      global: "Visão Global", reports: "Relatórios"
     },
     map: {
       title: "MAPA INTELIGENTE",
@@ -66,12 +67,11 @@ export const T: Record<Lang, any> = {
     earthquakes: {
       title: "TERREMOTOS EM TEMPO REAL",
       subtitle: "Dados USGS • Últimos 7 dias • Global",
-      loading: "Carregando dados USGS...",
-      noData: "Nenhum terremoto registrado.",
+      loading: "Carregando dados USGS...", noData: "Nenhum terremoto registrado.",
       mag: "Magnitude", depth: "Profundidade", location: "Local", time: "Horário",
       total: "Total de eventos", strong: "Fortes (M5+)", major: "Maiores (M7+)",
       low: "Baixo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
-      recent: "EVENTOS RECENTES", stats: "ESTATÍSTICAS", km: "km de profundidade",
+      recent: "EVENTOS RECENTES", km: "km de profundidade",
     },
     ai: {
       title: "INTELIGÊNCIA ARTIFICIAL PREDITIVA",
@@ -128,9 +128,10 @@ export const T: Record<Lang, any> = {
     subtitle: "Real-time predictive monitoring • State of São Paulo",
     nav: {
       dashboard: "Command Center", map: "Smart Map", earthquakes: "Earthquakes",
-      disasters: "Natural Disasters", urban: "Urban Monitoring", ai: "Predictive AI",
-      alertSystem: "Alert System", impact: "Social Impact", data: "Data Integration",
-      automation: "AI Automation", tech: "Technologies", global: "Global Vision", reports: "Reports"
+      floods: "Floods", disasters: "Natural Disasters", urban: "Urban Monitoring",
+      ai: "Predictive AI", alertSystem: "Alert System", impact: "Social Impact",
+      data: "Data Integration", automation: "AI Automation", tech: "Technologies",
+      global: "Global Vision", reports: "Reports"
     },
     map: {
       title: "SMART MAP",
@@ -164,12 +165,11 @@ export const T: Record<Lang, any> = {
     earthquakes: {
       title: "REAL-TIME EARTHQUAKES",
       subtitle: "USGS Data • Last 7 days • Global",
-      loading: "Loading USGS data...",
-      noData: "No earthquakes recorded.",
+      loading: "Loading USGS data...", noData: "No earthquakes recorded.",
       mag: "Magnitude", depth: "Depth", location: "Location", time: "Time",
       total: "Total events", strong: "Strong (M5+)", major: "Major (M7+)",
       low: "Low", moderate: "Moderate", high: "High", extreme: "Extreme",
-      recent: "RECENT EVENTS", stats: "STATISTICS", km: "km depth",
+      recent: "RECENT EVENTS", km: "km depth",
     },
     ai: {
       title: "PREDICTIVE ARTIFICIAL INTELLIGENCE",
@@ -226,9 +226,10 @@ export const T: Record<Lang, any> = {
     subtitle: "Monitoreo predictivo en tiempo real • Estado de São Paulo",
     nav: {
       dashboard: "Panel Central", map: "Mapa Inteligente", earthquakes: "Terremotos",
-      disasters: "Catástrofes Naturales", urban: "Monitoreo Urbano", ai: "IA Predictiva",
-      alertSystem: "Sistema de Alertas", impact: "Impacto Social", data: "Integración de Datos",
-      automation: "Automatización IA", tech: "Tecnologías", global: "Visión Global", reports: "Informes"
+      floods: "Inundaciones", disasters: "Catástrofes Naturales", urban: "Monitoreo Urbano",
+      ai: "IA Predictiva", alertSystem: "Sistema de Alertas", impact: "Impacto Social",
+      data: "Integración de Datos", automation: "Automatización IA", tech: "Tecnologías",
+      global: "Visión Global", reports: "Informes"
     },
     map: {
       title: "MAPA INTELIGENTE",
@@ -262,12 +263,11 @@ export const T: Record<Lang, any> = {
     earthquakes: {
       title: "TERREMOTOS EN TIEMPO REAL",
       subtitle: "Datos USGS • Últimos 7 días • Global",
-      loading: "Cargando datos USGS...",
-      noData: "Sin terremotos registrados.",
+      loading: "Cargando datos USGS...", noData: "Sin terremotos registrados.",
       mag: "Magnitud", depth: "Profundidad", location: "Lugar", time: "Hora",
       total: "Total de eventos", strong: "Fuertes (M5+)", major: "Mayores (M7+)",
       low: "Bajo", moderate: "Moderado", high: "Alto", extreme: "Extremo",
-      recent: "EVENTOS RECIENTES", stats: "ESTADÍSTICAS", km: "km de profundidad",
+      recent: "EVENTOS RECIENTES", km: "km de profundidad",
     },
     ai: {
       title: "INTELIGENCIA ARTIFICIAL PREDICTIVA",

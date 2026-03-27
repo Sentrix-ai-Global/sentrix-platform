@@ -1,4 +1,4 @@
-import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Shield, Activity } from "lucide-react";
+import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Shield, Activity, Droplets } from "lucide-react";
 import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
 
@@ -14,6 +14,7 @@ const navItems = (t: typeof T.pt) => [
   { id: "dashboard",   label: t.nav.dashboard,   icon: Shield,        badge: null },
   { id: "map",         label: t.nav.map,          icon: Globe,         badge: null },
   { id: "earthquakes", label: t.nav.earthquakes,  icon: Activity,      badge: null },
+  { id: "floods",      label: t.nav.floods,       icon: Droplets,      badge: null },
   { id: "disasters",   label: t.nav.disasters,    icon: AlertTriangle, badge: 2    },
   { id: "urban",       label: t.nav.urban,        icon: Building2,     badge: 5    },
   { id: "ai",          label: t.nav.ai,           icon: Brain,         badge: null },
@@ -46,8 +47,7 @@ export default function Sidebar({ lang, setLang, module, setModule, onClose }: S
             <button key={id} onClick={() => { setModule(id); onClose?.(); }}
               style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "none", cursor: "pointer", width: "100%", textAlign: "left", background: active ? "rgba(249,115,22,0.12)" : "transparent", borderLeft: active ? "2px solid #f97316" : "2px solid transparent", color: active ? "#fed7aa" : "#4a6080", transition: "all 0.15s", justifyContent: "space-between" }}
               onMouseEnter={e => { if (!active) e.currentTarget.style.color = "#94a3b8"; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.color = "#4a6080"; }}
-            >
+              onMouseLeave={e => { if (!active) e.currentTarget.style.color = "#4a6080"; }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <Icon size={15} style={{ flexShrink: 0 }} />
                 <span style={{ fontSize: 14, fontWeight: 600 }}>{label}</span>
