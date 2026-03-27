@@ -1,4 +1,4 @@
-import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Shield, Activity, Droplets, Wind } from "lucide-react";
+import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Shield, Activity, Droplets, Wind, Flame } from "lucide-react";
 import type { Lang } from "../../types";
 import { T } from "../../i18n/translations";
 
@@ -16,6 +16,7 @@ const navItems = (t: typeof T.pt) => [
   { id: "earthquakes", label: t.nav.earthquakes,  icon: Activity,      badge: null },
   { id: "floods",      label: t.nav.floods,       icon: Droplets,      badge: null },
   { id: "airquality",  label: t.nav.airquality,   icon: Wind,          badge: null },
+  { id: "wildfires",   label: t.nav.wildfires,    icon: Flame,         badge: null },
   { id: "disasters",   label: t.nav.disasters,    icon: AlertTriangle, badge: 2    },
   { id: "urban",       label: t.nav.urban,        icon: Building2,     badge: 5    },
   { id: "ai",          label: t.nav.ai,           icon: Brain,         badge: null },

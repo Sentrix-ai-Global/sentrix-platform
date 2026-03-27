@@ -30,10 +30,10 @@ export const T: Record<Lang, any> = {
     subtitle: "Monitoramento preditivo em tempo real • Estado de São Paulo",
     nav: {
       dashboard: "Painel Central", map: "Mapa Inteligente", earthquakes: "Terremotos",
-      floods: "Enchentes", disasters: "Catástrofes Naturais", urban: "Monitoramento Urbano",
-      ai: "IA Preditiva", alertSystem: "Sistema de Alertas", impact: "Impacto Social",
-      data: "Integração de Dados", automation: "Automação IA", tech: "Tecnologias",
-      global: "Visão Global", reports: "Relatórios"
+      floods: "Enchentes", airquality: "Qualidade do Ar", wildfires: "Queimadas",
+      disasters: "Catástrofes Naturais", urban: "Monitoramento Urbano", ai: "IA Preditiva",
+      alertSystem: "Sistema de Alertas", impact: "Impacto Social", data: "Integração de Dados",
+      automation: "Automação IA", tech: "Tecnologias", global: "Visão Global", reports: "Relatórios"
     },
     map: {
       title: "MAPA INTELIGENTE",
@@ -65,8 +65,7 @@ export const T: Record<Lang, any> = {
       rainHeavy: "🔴 Intensa", rainLight: "🟡 Leve", rainNone: "🟢 Sem chuva",
     },
     earthquakes: {
-      title: "TERREMOTOS EM TEMPO REAL",
-      subtitle: "Dados USGS • Últimos 7 dias • Global",
+      title: "TERREMOTOS EM TEMPO REAL", subtitle: "Dados USGS • Últimos 7 dias • Global",
       loading: "Carregando dados USGS...", noData: "Nenhum terremoto registrado.",
       mag: "Magnitude", depth: "Profundidade", location: "Local", time: "Horário",
       total: "Total de eventos", strong: "Fortes (M5+)", major: "Maiores (M7+)",
@@ -93,14 +92,13 @@ export const T: Record<Lang, any> = {
       subtitle: "Autoridades • População • Por região • Simulação preditiva",
       sent: "ENVIADOS", pending: "PENDENTES", reach: "ALCANCE", regions: "REGIÕES",
       newAlert: "NOVO ALERTA", high: "ALTA", medium: "MEDIA", low: "BAIXA",
-      sent_label: "Enviado", pending_label: "Pendente", scheduled: "Agendado",
-      sendNow: "ENVIAR AGORA",
+      sent_label: "Enviado", pending_label: "Pendente", scheduled: "Agendado", sendNow: "ENVIAR AGORA",
       alerts: [
         { title: "Risco Iminente de Enchente", level: "high", status: "sent", message: "Defesa Civil e bombeiros devem se posicionar nas áreas de risco da Zona Sul", region: "Zona Sul - SP", reach: 45, channels: ["SMS", "App", "Rádio"], time: "Há 5 min" },
-        { title: "Alerta de Tempestade Severa", level: "high", status: "sent", message: "Evite áreas alagáveis e busque abrigo. Risco de ventos fortes nas próximas horas.", region: "Grande São Paulo", reach: 2500000, channels: ["SMS", "TV", "Rádio", "App"], time: "Há 15 min" },
+        { title: "Alerta de Tempestade Severa", level: "high", status: "sent", message: "Evite áreas alagáveis e busque abrigo.", region: "Grande São Paulo", reach: 2500000, channels: ["SMS", "TV", "Rádio", "App"], time: "Há 15 min" },
         { title: "Previsão: Deslizamento em 24h", level: "medium", status: "pending", message: "IA detectou 73% de probabilidade de deslizamento na região da Brasilândia", region: "Brasilândia - ZN", reach: 8, channels: ["App", "Email"], time: "Agendado 06:00" },
-        { title: "Sensor: Nível Crítico Rio Tietê", level: "high", status: "sent", message: "Nível do rio ultrapassou 4.2m - acionamento automático de protocolo", region: "Marginal Tietê", reach: 120, channels: ["SMS", "App"], time: "Há 2 min" },
-        { title: "Aviso de Calor Extremo", level: "low", status: "scheduled", message: "Temperaturas acima de 38°C previstas. Hidrate-se e evite exposição solar.", region: "Estado de SP", reach: 45000000, channels: ["SMS", "TV"], time: "Amanhã 08:00" },
+        { title: "Sensor: Nível Crítico Rio Tietê", level: "high", status: "sent", message: "Nível do rio ultrapassou 4.2m", region: "Marginal Tietê", reach: 120, channels: ["SMS", "App"], time: "Há 2 min" },
+        { title: "Aviso de Calor Extremo", level: "low", status: "scheduled", message: "Temperaturas acima de 38°C previstas.", region: "Estado de SP", reach: 45000000, channels: ["SMS", "TV"], time: "Amanhã 08:00" },
       ]
     },
     disasters: {
@@ -128,10 +126,10 @@ export const T: Record<Lang, any> = {
     subtitle: "Real-time predictive monitoring • State of São Paulo",
     nav: {
       dashboard: "Command Center", map: "Smart Map", earthquakes: "Earthquakes",
-      floods: "Floods", disasters: "Natural Disasters", urban: "Urban Monitoring",
-      ai: "Predictive AI", alertSystem: "Alert System", impact: "Social Impact",
-      data: "Data Integration", automation: "AI Automation", tech: "Technologies",
-      global: "Global Vision", reports: "Reports"
+      floods: "Floods", airquality: "Air Quality", wildfires: "Wildfires",
+      disasters: "Natural Disasters", urban: "Urban Monitoring", ai: "Predictive AI",
+      alertSystem: "Alert System", impact: "Social Impact", data: "Data Integration",
+      automation: "AI Automation", tech: "Technologies", global: "Global Vision", reports: "Reports"
     },
     map: {
       title: "SMART MAP",
@@ -163,8 +161,7 @@ export const T: Record<Lang, any> = {
       rainHeavy: "🔴 Heavy", rainLight: "🟡 Light", rainNone: "🟢 No rain",
     },
     earthquakes: {
-      title: "REAL-TIME EARTHQUAKES",
-      subtitle: "USGS Data • Last 7 days • Global",
+      title: "REAL-TIME EARTHQUAKES", subtitle: "USGS Data • Last 7 days • Global",
       loading: "Loading USGS data...", noData: "No earthquakes recorded.",
       mag: "Magnitude", depth: "Depth", location: "Location", time: "Time",
       total: "Total events", strong: "Strong (M5+)", major: "Major (M7+)",
@@ -179,26 +176,24 @@ export const T: Record<Lang, any> = {
       probability: "Probability", confidence: "AI Confidence", factors: "Contributing factors",
       recommendation: "Recommendation", window_label: "Window", modelActive: "Model active", lastUpdate: "Last update",
       events: [
-        { title: "Urban Flood", location: "South Zone – Jabaquara, Santo Amaro", level: "critical", probability: 87, confidence: 92, window: "Next 6 hours", factors: ["120mm precipitation", "Saturated soil", "High tide"], recommendation: "Evacuate risk areas immediately" },
-        { title: "Landslide", location: "North Zone – Brasilândia", level: "high", probability: 73, confidence: 85, window: "12–24 hours", factors: ["72h: 180mm", "Slope > 30°", "History"], recommendation: "Intensive monitoring" },
-        { title: "Traffic Collapse", location: "Marginal Pinheiros", level: "medium", probability: 65, confidence: 78, window: "Today 17:00–20:00", factors: ["Allianz Parque event", "Works Km 8"], recommendation: "Activate alternative routes" },
-        { title: "Heat Wave", location: "Metropolitan Region", level: "medium", probability: 82, confidence: 88, window: "Next 3–5 days", factors: ["Hot air mass", "Low humidity"], recommendation: "Alert vulnerable population" },
-        { title: "Severe Storm", location: "East Zone", level: "low", probability: 35, confidence: 62, window: "48–72 hours", factors: ["Frontal system", "Moderate instability"], recommendation: "Standard monitoring" },
+        { title: "Urban Flood", location: "South Zone", level: "critical", probability: 87, confidence: 92, window: "Next 6 hours", factors: ["120mm precipitation", "Saturated soil"], recommendation: "Evacuate risk areas" },
+        { title: "Landslide", location: "North Zone", level: "high", probability: 73, confidence: 85, window: "12–24 hours", factors: ["72h: 180mm", "Slope > 30°"], recommendation: "Intensive monitoring" },
+        { title: "Traffic Collapse", location: "Marginal Pinheiros", level: "medium", probability: 65, confidence: 78, window: "Today 17:00–20:00", factors: ["Event", "Works"], recommendation: "Activate alternative routes" },
+        { title: "Heat Wave", location: "Metropolitan Region", level: "medium", probability: 82, confidence: 88, window: "Next 3–5 days", factors: ["Hot air mass"], recommendation: "Alert vulnerable population" },
+        { title: "Severe Storm", location: "East Zone", level: "low", probability: 35, confidence: 62, window: "48–72 hours", factors: ["Frontal system"], recommendation: "Standard monitoring" },
       ]
     },
     alertSystem: {
-      title: "ALERT SYSTEM",
-      subtitle: "Authorities • Population • By region • Predictive simulation",
+      title: "ALERT SYSTEM", subtitle: "Authorities • Population • By region",
       sent: "SENT", pending: "PENDING", reach: "REACH", regions: "REGIONS",
       newAlert: "NEW ALERT", high: "HIGH", medium: "MEDIUM", low: "LOW",
-      sent_label: "Sent", pending_label: "Pending", scheduled: "Scheduled",
-      sendNow: "SEND NOW",
+      sent_label: "Sent", pending_label: "Pending", scheduled: "Scheduled", sendNow: "SEND NOW",
       alerts: [
-        { title: "Imminent Flood Risk", level: "high", status: "sent", message: "Civil Defense and firefighters must position in South Zone risk areas", region: "South Zone - SP", reach: 45, channels: ["SMS", "App", "Radio"], time: "5 min ago" },
-        { title: "Severe Storm Alert", level: "high", status: "sent", message: "Avoid flood-prone areas and seek shelter. Strong winds expected.", region: "Greater São Paulo", reach: 2500000, channels: ["SMS", "TV", "Radio", "App"], time: "15 min ago" },
-        { title: "Landslide Forecast 24h", level: "medium", status: "pending", message: "AI detected 73% probability of landslide in Brasilândia area", region: "Brasilândia - NZ", reach: 8, channels: ["App", "Email"], time: "Scheduled 06:00" },
-        { title: "Critical River Level Alert", level: "high", status: "sent", message: "River level exceeded 4.2m - automatic protocol triggered", region: "Marginal Tietê", reach: 120, channels: ["SMS", "App"], time: "2 min ago" },
-        { title: "Extreme Heat Warning", level: "low", status: "scheduled", message: "Temperatures above 38°C forecast. Stay hydrated.", region: "State of SP", reach: 45000000, channels: ["SMS", "TV"], time: "Tomorrow 08:00" },
+        { title: "Imminent Flood Risk", level: "high", status: "sent", message: "Civil Defense must position in South Zone", region: "South Zone - SP", reach: 45, channels: ["SMS", "App"], time: "5 min ago" },
+        { title: "Severe Storm Alert", level: "high", status: "sent", message: "Avoid flood-prone areas.", region: "Greater São Paulo", reach: 2500000, channels: ["SMS", "TV"], time: "15 min ago" },
+        { title: "Landslide Forecast 24h", level: "medium", status: "pending", message: "73% probability of landslide", region: "Brasilândia", reach: 8, channels: ["App"], time: "Scheduled 06:00" },
+        { title: "Critical River Level", level: "high", status: "sent", message: "River exceeded 4.2m", region: "Marginal Tietê", reach: 120, channels: ["SMS"], time: "2 min ago" },
+        { title: "Extreme Heat Warning", level: "low", status: "scheduled", message: "Temperatures above 38°C.", region: "State of SP", reach: 45000000, channels: ["SMS", "TV"], time: "Tomorrow 08:00" },
       ]
     },
     disasters: {
@@ -226,10 +221,10 @@ export const T: Record<Lang, any> = {
     subtitle: "Monitoreo predictivo en tiempo real • Estado de São Paulo",
     nav: {
       dashboard: "Panel Central", map: "Mapa Inteligente", earthquakes: "Terremotos",
-      floods: "Inundaciones", disasters: "Catástrofes Naturales", urban: "Monitoreo Urbano",
-      ai: "IA Predictiva", alertSystem: "Sistema de Alertas", impact: "Impacto Social",
-      data: "Integración de Datos", automation: "Automatización IA", tech: "Tecnologías",
-      global: "Visión Global", reports: "Informes"
+      floods: "Inundaciones", airquality: "Calidad del Aire", wildfires: "Incendios",
+      disasters: "Catástrofes Naturales", urban: "Monitoreo Urbano", ai: "IA Predictiva",
+      alertSystem: "Sistema de Alertas", impact: "Impacto Social", data: "Integración de Datos",
+      automation: "Automatización IA", tech: "Tecnologías", global: "Visión Global", reports: "Informes"
     },
     map: {
       title: "MAPA INTELIGENTE",
@@ -261,8 +256,7 @@ export const T: Record<Lang, any> = {
       rainHeavy: "🔴 Intensa", rainLight: "🟡 Leve", rainNone: "🟢 Sin lluvia",
     },
     earthquakes: {
-      title: "TERREMOTOS EN TIEMPO REAL",
-      subtitle: "Datos USGS • Últimos 7 días • Global",
+      title: "TERREMOTOS EN TIEMPO REAL", subtitle: "Datos USGS • Últimos 7 días • Global",
       loading: "Cargando datos USGS...", noData: "Sin terremotos registrados.",
       mag: "Magnitud", depth: "Profundidad", location: "Lugar", time: "Hora",
       total: "Total de eventos", strong: "Fuertes (M5+)", major: "Mayores (M7+)",
@@ -277,26 +271,24 @@ export const T: Record<Lang, any> = {
       probability: "Probabilidad", confidence: "Confianza IA", factors: "Factores contribuyentes",
       recommendation: "Recomendación", window_label: "Ventana", modelActive: "Modelo activo", lastUpdate: "Última actualización",
       events: [
-        { title: "Inundación Urbana", location: "Zona Sur – Jabaquara, Santo Amaro", level: "critical", probability: 87, confidence: 92, window: "Próximas 6 horas", factors: ["Precipitación 120mm", "Suelo saturado", "Marea alta"], recommendation: "Evacuar áreas de riesgo" },
-        { title: "Deslizamiento de Tierra", location: "Zona Norte – Brasilândia", level: "high", probability: 73, confidence: 85, window: "12–24 horas", factors: ["72h: 180mm", "Inclinación > 30°"], recommendation: "Monitoreo intensivo" },
-        { title: "Colapso de Tráfico", location: "Marginal Pinheiros", level: "medium", probability: 65, confidence: 78, window: "Hoy 17:00–20:00", factors: ["Evento Allianz", "Obras Km 8"], recommendation: "Activar rutas alternativas" },
+        { title: "Inundación Urbana", location: "Zona Sur", level: "critical", probability: 87, confidence: 92, window: "Próximas 6 horas", factors: ["Precipitación 120mm"], recommendation: "Evacuar áreas de riesgo" },
+        { title: "Deslizamiento", location: "Zona Norte", level: "high", probability: 73, confidence: 85, window: "12–24 horas", factors: ["72h: 180mm"], recommendation: "Monitoreo intensivo" },
+        { title: "Colapso de Tráfico", location: "Marginal Pinheiros", level: "medium", probability: 65, confidence: 78, window: "Hoy 17:00–20:00", factors: ["Obras"], recommendation: "Activar rutas alternativas" },
         { title: "Ola de Calor", location: "Región Metropolitana", level: "medium", probability: 82, confidence: 88, window: "Próximos 3–5 días", factors: ["Masa de aire caliente"], recommendation: "Alertar población vulnerable" },
         { title: "Tormenta Severa", location: "Zona Este", level: "low", probability: 35, confidence: 62, window: "48–72 horas", factors: ["Sistema frontal"], recommendation: "Monitoreo estándar" },
       ]
     },
     alertSystem: {
-      title: "SISTEMA DE ALERTAS",
-      subtitle: "Autoridades • Población • Por región • Simulación predictiva",
+      title: "SISTEMA DE ALERTAS", subtitle: "Autoridades • Población • Por región",
       sent: "ENVIADOS", pending: "PENDIENTES", reach: "ALCANCE", regions: "REGIONES",
       newAlert: "NUEVA ALERTA", high: "ALTA", medium: "MEDIA", low: "BAJA",
-      sent_label: "Enviado", pending_label: "Pendiente", scheduled: "Programado",
-      sendNow: "ENVIAR AHORA",
+      sent_label: "Enviado", pending_label: "Pendiente", scheduled: "Programado", sendNow: "ENVIAR AHORA",
       alerts: [
-        { title: "Riesgo Inminente de Inundación", level: "high", status: "sent", message: "Defensa Civil y bomberos deben posicionarse en áreas de riesgo", region: "Zona Sur - SP", reach: 45, channels: ["SMS", "App", "Radio"], time: "Hace 5 min" },
-        { title: "Alerta de Tormenta Severa", level: "high", status: "sent", message: "Evite áreas inundables y busque refugio. Vientos fuertes previstos.", region: "Gran São Paulo", reach: 2500000, channels: ["SMS", "TV", "Radio", "App"], time: "Hace 15 min" },
-        { title: "Previsión: Deslizamiento 24h", level: "medium", status: "pending", message: "IA detectó 73% de probabilidad de deslizamiento en Brasilândia", region: "Brasilândia - ZN", reach: 8, channels: ["App", "Email"], time: "Programado 06:00" },
-        { title: "Nivel Crítico Río Tietê", level: "high", status: "sent", message: "Nivel del río superó 4.2m - protocolo automático activado", region: "Marginal Tietê", reach: 120, channels: ["SMS", "App"], time: "Hace 2 min" },
-        { title: "Aviso de Calor Extremo", level: "low", status: "scheduled", message: "Temperaturas sobre 38°C previstas. Manténgase hidratado.", region: "Estado de SP", reach: 45000000, channels: ["SMS", "TV"], time: "Mañana 08:00" },
+        { title: "Riesgo de Inundación", level: "high", status: "sent", message: "Defensa Civil en áreas de riesgo", region: "Zona Sur - SP", reach: 45, channels: ["SMS"], time: "Hace 5 min" },
+        { title: "Alerta Tormenta", level: "high", status: "sent", message: "Busque refugio.", region: "Gran São Paulo", reach: 2500000, channels: ["TV"], time: "Hace 15 min" },
+        { title: "Deslizamiento 24h", level: "medium", status: "pending", message: "73% probabilidad deslizamiento", region: "Brasilândia", reach: 8, channels: ["App"], time: "Programado 06:00" },
+        { title: "Nivel Crítico Río", level: "high", status: "sent", message: "Río superó 4.2m", region: "Marginal Tietê", reach: 120, channels: ["SMS"], time: "Hace 2 min" },
+        { title: "Calor Extremo", level: "low", status: "scheduled", message: "Temperaturas sobre 38°C.", region: "Estado SP", reach: 45000000, channels: ["TV"], time: "Mañana 08:00" },
       ]
     },
     disasters: {

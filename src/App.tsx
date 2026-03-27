@@ -11,6 +11,7 @@ import MapModule    from "./modules/Map";
 import Earthquakes  from "./modules/Earthquakes";
 import Floods       from "./modules/Floods";
 import AirQuality   from "./modules/AirQuality";
+import Wildfires    from "./modules/Wildfires";
 import Placeholder  from "./modules/Placeholder";
 import type { Lang } from "./types";
 
@@ -51,7 +52,8 @@ export default function App() {
           {module === "earthquakes" && <Earthquakes  lang={lang} />}
           {module === "floods"      && <Floods       lang={lang} />}
           {module === "airquality"  && <AirQuality   lang={lang} />}
-          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && module !== "floods" && module !== "airquality" && (
+          {module === "wildfires"   && <Wildfires    lang={lang} />}
+          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && module !== "floods" && module !== "airquality" && module !== "wildfires" && (
             <Placeholder lang={lang} moduleId={module} />
           )}
           {mapMounted && (
