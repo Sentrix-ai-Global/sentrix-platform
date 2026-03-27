@@ -1,10 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-
 import Sidebar from "./components/layout/Sidebar";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
-
 import Dashboard    from "./modules/Dashboard";
 import AIPredictive from "./modules/AI";
 import AlertSystem  from "./modules/Alerts";
@@ -12,7 +11,6 @@ import Disasters    from "./modules/Disasters";
 import MapModule    from "./modules/Map";
 import Earthquakes  from "./modules/Earthquakes";
 import Placeholder  from "./modules/Placeholder";
-
 import type { Lang } from "./types";
 
 export default function App() {
@@ -22,9 +20,7 @@ export default function App() {
   const [mapMounted, setMapMounted] = useState(false);
 
   useEffect(() => {
-    if (module === "map" && !mapMounted) {
-      setMapMounted(true);
-    }
+    if (module === "map" && !mapMounted) setMapMounted(true);
   }, [module]);
 
   return (
@@ -47,17 +43,14 @@ export default function App() {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 10, minWidth: 0 }}>
         <Header lang={lang} onMenuOpen={() => setMenuOpen(true)} />
         <main style={{ flex: 1, overflow: "auto", padding: "24px", position: "relative" }}>
-
-          {module === "dashboard"  && <Dashboard    lang={lang} />}
-          {module === "ai"         && <AIPredictive lang={lang} />}
-          {module === "alerts"     && <AlertSystem  lang={lang} />}
-          {module === "disasters"  && <Disasters    lang={lang} />}
-          {module === "earthquakes" && <Earthquakes lang={lang} />}
-
+          {module === "dashboard"   && <Dashboard    lang={lang} />}
+          {module === "ai"          && <AIPredictive lang={lang} />}
+          {module === "alerts"      && <AlertSystem  lang={lang} />}
+          {module === "disasters"   && <Disasters    lang={lang} />}
+          {module === "earthquakes" && <Earthquakes  lang={lang} />}
           {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && (
             <Placeholder lang={lang} moduleId={module} />
           )}
-
           {mapMounted && (
             <div style={{
               display: module === "map" ? "block" : "none",
@@ -69,7 +62,6 @@ export default function App() {
               <MapModule lang={lang} />
             </div>
           )}
-
         </main>
         <Footer lang={lang} />
       </div>
