@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity, Flame } from "lucide-react";
 import type { Lang } from "../../types";
 import L from "leaflet";
+import { T, weatherCodes } from "../../i18n/translations";
 import {
   fetchEarthquakes, fetchNasaFires, fetchInpeFires, fetchGdacsEvents,
   fetchFloodData, fetchAirQuality, fetchWeather,
-  quakeColor, quakeRadius, airQualityColor, floodColor, gdacsColor, weatherCodes,
+  quakeColor, quakeRadius, airQualityColor, floodColor, gdacsColor,
   type WeatherData, type FloodFeature, type AirQualityFeature, type GdacsEvent,
 } from "../../services/mapServices";
 
@@ -19,86 +20,8 @@ L.Icon.Default.mergeOptions({
 interface MapProps { lang: Lang; }
 interface Location { display_name: string; lat: string; lon: string; place_id: number; }
 
-const labels = {
-  pt: {
-    title: "MAPA INTELIGENTE",
-    subtitle: "Meteorologia • Terremotos USGS • Incêndios NASA • INPE • Enchentes • Ar • GDACS ONU",
-    placeholder: "Digite país, estado, cidade, rua ou endereço...",
-    searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
-    lat: "Lat", lon: "Lon", noResults: "Nenhum resultado encontrado.",
-    expand: "TELA CHEIA", collapse: "MINIMIZAR",
-    weatherTitle: "METEOROLOGIA", weatherFull: "DADOS METEOROLÓGICOS EM TEMPO REAL",
-    temp: "Temp.", wind: "Vento", humidity: "Umidade", rain: "Chuva",
-    loading: "Carregando...", clickHint: "🌐 Clique no mapa para dados ao vivo",
-    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitude", quakeDepth: "Profundidade", quakeTime: "Horário",
-    quakeLayer: "🟠 TERREMOTOS", quakeLoading: "Carregando terremotos...",
-    fireTitle: "INCÊNDIO — NASA FIRMS", fireLayer: "🔴 NASA FIRMS",
-    fireLoading: "Carregando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confiança",
-    inpeTitle: "QUEIMADA — INPE BRASIL", inpeLayer: "🟡 INPE",
-    inpeLoading: "Carregando INPE...", inpeMunicipality: "Município", inpeState: "Estado",
-    floodTitle: "ENCHENTE — OPEN-METEO", floodDischarge: "Descarga (m³/s)", floodStatus: "Status do Rio",
-    airTitle: "QUALIDADE DO AR", airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
-    gdacsTitle: "DESASTRE — GDACS ONU", gdacsLayer: "🔷 GDACS ONU", gdacsLoading: "Carregando ONU...",
-    gdacsType: "Tipo", gdacsCountry: "País", gdacsAlert: "Nível ONU", gdacsDate: "Data",
-    low: "Baixo", moderate: "Moderado", high: "Alto", extreme: "Extremo", legend: "LEGENDA",
-    floodNormal: "Normal", floodAttention: "Atenção", floodCritical: "Crítico",
-    airGood: "Boa", airModerate: "Moderada", airPoor: "Ruim", airHazardous: "Perigosa",
-    gdacsGreen: "Verde", gdacsOrange: "Laranja", gdacsRed: "Vermelho",
-  },
-  en: {
-    title: "SMART MAP",
-    subtitle: "Weather • USGS Earthquakes • NASA Fires • INPE • Floods • Air • GDACS UN",
-    placeholder: "Type country, state, city, street or address...",
-    searching: "Searching...", search: "SEARCH", results: "RESULTS",
-    lat: "Lat", lon: "Lon", noResults: "No results found.",
-    expand: "FULL SCREEN", collapse: "MINIMIZE",
-    weatherTitle: "WEATHER", weatherFull: "REAL-TIME WEATHER DATA",
-    temp: "Temp.", wind: "Wind", humidity: "Humidity", rain: "Rain",
-    loading: "Loading...", clickHint: "🌐 Click map for live data",
-    quakeTitle: "EARTHQUAKE — USGS", quakeMag: "Magnitude", quakeDepth: "Depth", quakeTime: "Time",
-    quakeLayer: "🟠 EARTHQUAKES", quakeLoading: "Loading earthquakes...",
-    fireTitle: "FIRE — NASA FIRMS", fireLayer: "🔴 NASA FIRMS",
-    fireLoading: "Loading NASA...", fireBrightness: "Temperature", fireConfidence: "Confidence",
-    inpeTitle: "FIRE — INPE BRAZIL", inpeLayer: "🟡 INPE",
-    inpeLoading: "Loading INPE...", inpeMunicipality: "Municipality", inpeState: "State",
-    floodTitle: "FLOOD — OPEN-METEO", floodDischarge: "Discharge (m³/s)", floodStatus: "River Status",
-    airTitle: "AIR QUALITY", airAqi: "AQI Index", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
-    gdacsTitle: "DISASTER — GDACS UN", gdacsLayer: "🔷 GDACS UN", gdacsLoading: "Loading UN...",
-    gdacsType: "Type", gdacsCountry: "Country", gdacsAlert: "UN Level", gdacsDate: "Date",
-    low: "Low", moderate: "Moderate", high: "High", extreme: "Extreme", legend: "LEGEND",
-    floodNormal: "Normal", floodAttention: "Attention", floodCritical: "Critical",
-    airGood: "Good", airModerate: "Moderate", airPoor: "Poor", airHazardous: "Hazardous",
-    gdacsGreen: "Green", gdacsOrange: "Orange", gdacsRed: "Red",
-  },
-  es: {
-    title: "MAPA INTELIGENTE",
-    subtitle: "Meteorología • Terremotos USGS • Incendios NASA • INPE • Inundaciones • Aire • GDACS ONU",
-    placeholder: "Escriba país, estado, ciudad, calle o dirección...",
-    searching: "Buscando...", search: "BUSCAR", results: "RESULTADOS",
-    lat: "Lat", lon: "Lon", noResults: "Sin resultados.",
-    expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR",
-    weatherTitle: "METEOROLOGÍA", weatherFull: "DATOS METEOROLÓGICOS EN TIEMPO REAL",
-    temp: "Temp.", wind: "Viento", humidity: "Humedad", rain: "Lluvia",
-    loading: "Cargando...", clickHint: "🌐 Clic en el mapa para datos en vivo",
-    quakeTitle: "TERREMOTO — USGS", quakeMag: "Magnitud", quakeDepth: "Profundidad", quakeTime: "Hora",
-    quakeLayer: "🟠 TERREMOTOS", quakeLoading: "Cargando terremotos...",
-    fireTitle: "INCENDIO — NASA FIRMS", fireLayer: "🔴 NASA FIRMS",
-    fireLoading: "Cargando NASA...", fireBrightness: "Temperatura", fireConfidence: "Confianza",
-    inpeTitle: "INCENDIO — INPE BRASIL", inpeLayer: "🟡 INPE",
-    inpeLoading: "Cargando INPE...", inpeMunicipality: "Municipio", inpeState: "Estado",
-    floodTitle: "INUNDACIÓN — OPEN-METEO", floodDischarge: "Descarga (m³/s)", floodStatus: "Estado del Río",
-    airTitle: "CALIDAD DEL AIRE", airAqi: "Índice AQI", airPm25: "PM2.5 (µg/m³)", airPm10: "PM10 (µg/m³)",
-    gdacsTitle: "DESASTRE — GDACS ONU", gdacsLayer: "🔷 GDACS ONU", gdacsLoading: "Cargando ONU...",
-    gdacsType: "Tipo", gdacsCountry: "País", gdacsAlert: "Nivel ONU", gdacsDate: "Fecha",
-    low: "Bajo", moderate: "Moderado", high: "Alto", extreme: "Extremo", legend: "LEYENDA",
-    floodNormal: "Normal", floodAttention: "Atención", floodCritical: "Crítico",
-    airGood: "Buena", airModerate: "Moderada", airPoor: "Mala", airHazardous: "Peligrosa",
-    gdacsGreen: "Verde", gdacsOrange: "Naranja", gdacsRed: "Rojo",
-  },
-};
-
 export default function MapModule({ lang }: MapProps) {
-  const l = labels[lang];
+  const l = T[lang].map;
   const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef      = useRef<L.Marker | null>(null);
@@ -227,14 +150,12 @@ export default function MapModule({ lang }: MapProps) {
 
   useEffect(() => {
     activeRef.current = true;
-
     if (!document.getElementById("leaflet-css")) {
       const link = document.createElement("link");
       link.id = "leaflet-css"; link.rel = "stylesheet";
       link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
       document.head.appendChild(link);
     }
-
     const timer = setTimeout(() => {
       if (!mapRef.current || mapInstanceRef.current) return;
       const map = L.map(mapRef.current, { center: [0, 0], zoom: 2, zoomControl: true });
@@ -245,12 +166,7 @@ export default function MapModule({ lang }: MapProps) {
       mapInstanceRef.current = map;
       loadMapLayers(map);
     }, 200);
-
-    return () => {
-      activeRef.current = false;
-      clearTimeout(timer);
-      // ✅ NÃO chamamos map.remove() — o Leaflet não suporta ser destruído e recriado
-    };
+    return () => { activeRef.current = false; clearTimeout(timer); };
   }, []);
 
   useEffect(() => {
@@ -285,7 +201,7 @@ export default function MapModule({ lang }: MapProps) {
     handleMapClick(lat, lon);
   };
 
-  const wInfo     = weather ? (weatherCodes[weather.weathercode] || { label: "—", icon: "🌡️" }) : null;
+  const wInfo     = weather ? (weatherCodes[weather.weathercode]?.[lang] || { label: "—", icon: "🌡️" }) : null;
   const tempColor = weather ? (weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#3b82f6" : "#22c55e") : "#06b6d4";
   const quakeMagLabel    = (mag: number) => mag >= 7 ? l.extreme : mag >= 5 ? l.high : mag >= 3 ? l.moderate : l.low;
   const floodStatusLabel = (lv: FloodFeature["level"]) => lv === "critical" ? l.floodCritical : lv === "attention" ? l.floodAttention : l.floodNormal;
@@ -589,10 +505,10 @@ export default function MapModule({ lang }: MapProps) {
           {weather && !weatherLoading && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
               {[
-                { icon: Thermometer, label: l.temp,     value: `${weather.temperature}°C`,   color: tempColor,   sub: weather.temperature > 35 ? "🔴 Extremo" : weather.temperature > 25 ? "🟡 Quente" : weather.temperature < 5 ? "🔵 Frio" : "🟢 Agradável" },
-                { icon: Wind,        label: l.wind,     value: `${weather.windspeed} km/h`,  color: "#8b5cf6",   sub: weather.windspeed > 50 ? "🔴 Forte" : weather.windspeed > 20 ? "🟡 Moderado" : "🟢 Fraco" },
-                { icon: Droplets,    label: l.humidity, value: `${weather.humidity}%`,       color: "#06b6d4",   sub: weather.humidity > 80 ? "🔵 Alta" : weather.humidity > 50 ? "🟡 Moderada" : "🟠 Baixa" },
-                { icon: Eye,         label: l.rain,     value: `${weather.precipitation}mm`, color: weather.precipitation > 10 ? "#ef4444" : "#22c55e", sub: weather.precipitation > 10 ? "🔴 Intensa" : weather.precipitation > 0 ? "🟡 Leve" : "🟢 Sem chuva" },
+                { icon: Thermometer, label: l.temp,     value: `${weather.temperature}°C`,   color: tempColor,   sub: weather.temperature > 35 ? l.tempExtreme : weather.temperature > 25 ? l.tempHot : weather.temperature < 5 ? l.tempCold : l.tempNice },
+                { icon: Wind,        label: l.wind,     value: `${weather.windspeed} km/h`,  color: "#8b5cf6",   sub: weather.windspeed > 50 ? l.windStrong : weather.windspeed > 20 ? l.windModerate : l.windWeak },
+                { icon: Droplets,    label: l.humidity, value: `${weather.humidity}%`,       color: "#06b6d4",   sub: weather.humidity > 80 ? l.humidityHigh : weather.humidity > 50 ? l.humidityModerate : l.humidityLow },
+                { icon: Eye,         label: l.rain,     value: `${weather.precipitation}mm`, color: weather.precipitation > 10 ? "#ef4444" : "#22c55e", sub: weather.precipitation > 10 ? l.rainHeavy : weather.precipitation > 0 ? l.rainLight : l.rainNone },
               ].map(({ icon: Icon, label, value, color, sub }) => (
                 <div key={label} style={{ padding: "12px 14px", borderRadius: 10, background: "#060e22", border: `1px solid ${color}25` }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = color + "60"; }}
