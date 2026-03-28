@@ -1,12 +1,74 @@
+import { useEffect, useRef } from "react";
 import { CheckCircle, Clock, Users, MapPin, Send } from "lucide-react";
 import type { Lang, RiskLevel } from "../../types";
 import { levelConfig } from "../../types";
 import { T } from "../../i18n/translations";
+import L from "leaflet";
+
+const alertsMapHint: Record<Lang, string> = {
+  pt: "Mapa de alertas ativos (região ilustrativa)",
+  en: "Active alerts map (illustrative regions)",
+  es: "Mapa de alertas activos (regiones ilustrativas)",
+  fr: "Carte des alertes actives (régions illustratives)",
+};
+
+const alertCoords: [number, number][] = [
+  [-23.64, -46.67], [-23.54, -46.64], [-23.52, -46.43], [-23.58, -46.69], [-23.50, -46.60],
+];
 
 interface AlertsProps { lang: Lang; }
 
 export default function AlertSystem({ lang }: AlertsProps) {
   const al = T[lang].alertSystem;
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(link);
+    }
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+      iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    });
+    const timer = setTimeout(() => {
+      if (!mapRef.current || mapInstanceRef.current) return;
+      const alerts = T[lang].alertSystem.alerts as { title: string; level: string; region: string; status: string }[];
+      const map = L.map(mapRef.current, { center: [-23.55, -46.63], zoom: 10, zoomControl: true });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OSM", maxZoom: 19 }).addTo(map);
+      mapInstanceRef.current = map;
+      const layer = L.featureGroup().addTo(map);
+      alerts.forEach((alert, i) => {
+        const coord = alertCoords[i] ?? alertCoords[0];
+        const cfg = levelConfig[alert.level as RiskLevel];
+        const m = L.circleMarker(coord, {
+          radius: 11,
+          fillColor: cfg.color,
+          color: "#fff",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.85,
+        }).addTo(layer);
+        m.bindPopup(`<strong>${alert.title}</strong><br/>${alert.region}<br/>${alert.status}`);
+      });
+      try {
+        map.fitBounds(layer.getBounds(), { padding: [24, 24], maxZoom: 11 });
+      } catch {
+        map.setView([-23.55, -46.63], 10);
+      }
+    }, 200);
+    return () => {
+      clearTimeout(timer);
+      mapInstanceRef.current?.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [lang]);
 
   const statsCards = [
     { label: al.sent,    value: "3",     color: "#22c55e", icon: CheckCircle },
@@ -49,6 +111,11 @@ export default function AlertSystem({ lang }: AlertsProps) {
         <Send size={18} />
         {al.newAlert}
       </button>
+
+      <div>
+        <p style={{ fontSize: 12, color: "#ef4444", fontWeight: 800, margin: "0 0 8px", letterSpacing: "0.06em" }}>{alertsMapHint[lang]}</p>
+        <div ref={mapRef} style={{ width: "100%", height: "38vh", minHeight: 240, borderRadius: 14, overflow: "hidden", border: "1px solid #1a2744" }} />
+      </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {al.alerts.map((alert: any, i: number) => {

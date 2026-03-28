@@ -1,14 +1,79 @@
+import { useEffect, useRef } from "react";
 import type { Lang, DisasterStatus } from "../../types";
 import { statusConfig } from "../../types";
 import { T } from "../../i18n/translations";
+import L from "leaflet";
 
-interface DisastersProps {
-  lang: Lang;
-}
+const mapTitle: Record<Lang, string> = {
+  pt: "Mapa de riscos (visão demo — Grande SP)",
+  en: "Risk map (demo — Greater São Paulo)",
+  es: "Mapa de riesgos (demo — Gran São Paulo)",
+  fr: "Carte des risques (démo — Grand São Paulo)",
+};
 
-export default function Disasters({ lang }: DisastersProps) {
+const center: [number, number] = [-23.55, -46.63];
+const offsets: [number, number][] = [
+  [-0.05, -0.06], [0.04, -0.04], [-0.03, 0.05], [0.05, 0.03], [-0.04, 0.04], [0.03, -0.07],
+];
+
+export default function Disasters({ lang }: { lang: Lang }) {
   const d = T[lang].disasters;
   const statusLabel = { critical: d.critical, alert: d.alert, monitoring: d.monitoring, safe: d.safe };
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(link);
+    }
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+      iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    });
+
+    const timer = setTimeout(() => {
+      if (!mapRef.current || mapInstanceRef.current) return;
+      const dd = T[lang].disasters;
+      const slMap = { critical: dd.critical, alert: dd.alert, monitoring: dd.monitoring, safe: dd.safe };
+      const map = L.map(mapRef.current, { center, zoom: 10, zoomControl: true });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OSM", maxZoom: 19 }).addTo(map);
+      mapInstanceRef.current = map;
+      const layer = L.featureGroup().addTo(map);
+      const types = dd.types as { name: string; status: string; risk: number; icon?: string }[];
+      types.forEach((type, i) => {
+        const sc = statusConfig[type.status as DisasterStatus];
+        const lat = center[0] + (offsets[i]?.[0] ?? 0);
+        const lon = center[1] + (offsets[i]?.[1] ?? 0);
+        const circle = L.circleMarker([lat, lon], {
+          radius: 8 + (type.risk ?? 50) / 20,
+          fillColor: sc.color,
+          color: "#fff",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.75,
+        }).addTo(layer);
+        const sl = slMap[type.status as keyof typeof slMap] ?? "";
+        circle.bindPopup(`<strong>${type.icon ?? ""} ${type.name}</strong><br/>${sl} · ${type.risk}%`);
+      });
+      try {
+        map.fitBounds(layer.getBounds(), { padding: [28, 28], maxZoom: 11 });
+      } catch {
+        map.setView(center, 10);
+      }
+    }, 250);
+
+    return () => {
+      clearTimeout(timer);
+      mapInstanceRef.current?.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [lang]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -19,6 +84,12 @@ export default function Disasters({ lang }: DisastersProps) {
         </div>
         <p style={{ fontSize: 13, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.1em", marginLeft: 16 }}>{d.subtitle}</p>
       </div>
+
+      <div>
+        <p style={{ fontSize: 12, color: "#06b6d4", fontWeight: 800, margin: "0 0 8px", letterSpacing: "0.06em" }}>{mapTitle[lang]}</p>
+        <div ref={mapRef} style={{ width: "100%", height: "42vh", minHeight: 260, borderRadius: 14, overflow: "hidden", border: "1px solid #1a2744" }} />
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
         {d.types.map((type: any, i: number) => {
           const sc = statusConfig[type.status as DisasterStatus];

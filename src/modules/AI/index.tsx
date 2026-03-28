@@ -1,12 +1,75 @@
+import { useEffect, useRef } from "react";
 import { Brain, Target, Bell, Clock, MapPin, ChevronRight, Cpu } from "lucide-react";
 import type { Lang, RiskLevel } from "../../types";
 import { levelConfig } from "../../types";
 import { T } from "../../i18n/translations";
+import L from "leaflet";
+
+const aiMapHint: Record<Lang, string> = {
+  pt: "Mapa de cenários IA (localização ilustrativa — SP)",
+  en: "AI scenario map (illustrative — São Paulo)",
+  es: "Mapa de escenarios IA (ilustrativo — SP)",
+  fr: "Carte des scénarios IA (illustratif — São Paulo)",
+};
+
+const aiCoords: [number, number][] = [
+  [-23.65, -46.65], [-23.48, -46.42], [-23.57, -46.70], [-23.52, -46.58], [-23.56, -46.50],
+];
 
 interface AIProps { lang: Lang; }
 
 export default function AIPredictive({ lang }: AIProps) {
   const ai = T[lang].ai;
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(link);
+    }
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+      iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    });
+    const timer = setTimeout(() => {
+      if (!mapRef.current || mapInstanceRef.current) return;
+      const a = T[lang].ai;
+      const map = L.map(mapRef.current, { center: [-23.55, -46.63], zoom: 10, zoomControl: true });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OSM", maxZoom: 19 }).addTo(map);
+      mapInstanceRef.current = map;
+      const layer = L.featureGroup().addTo(map);
+      a.events.forEach((event: { title: string; level: string; location: string }, i: number) => {
+        const coord = aiCoords[i] ?? aiCoords[0];
+        const cfg = levelConfig[event.level as RiskLevel];
+        const circle = L.circleMarker(coord, {
+          radius: 12,
+          fillColor: cfg.color,
+          color: "#fff",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8,
+        }).addTo(layer);
+        const levelLabel = a[event.level as keyof typeof a] as string;
+        circle.bindPopup(`<strong>${event.title}</strong><br/>${event.location}<br/>${levelLabel}`);
+      });
+      try {
+        map.fitBounds(layer.getBounds(), { padding: [24, 24], maxZoom: 11 });
+      } catch {
+        map.setView([-23.55, -46.63], 10);
+      }
+    }, 200);
+    return () => {
+      clearTimeout(timer);
+      mapInstanceRef.current?.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [lang]);
 
   const statsCards = [
     { icon: Target, label: ai.accuracy,    value: "94%", color: "#8b5cf6" },
@@ -39,6 +102,11 @@ export default function AIPredictive({ lang }: AIProps) {
             <p style={{ fontSize: 13, color: "#4a6080", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 8 }}>{label}</p>
           </div>
         ))}
+      </div>
+
+      <div>
+        <p style={{ fontSize: 12, color: "#8b5cf6", fontWeight: 800, margin: "0 0 8px", letterSpacing: "0.06em" }}>{aiMapHint[lang]}</p>
+        <div ref={mapRef} style={{ width: "100%", height: "38vh", minHeight: 240, borderRadius: 14, overflow: "hidden", border: "1px solid #1a2744" }} />
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, flexWrap: "wrap" }}>
