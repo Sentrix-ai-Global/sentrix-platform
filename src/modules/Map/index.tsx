@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Search, MapPin, ChevronRight, Loader, AlertTriangle, Navigation, Maximize2, Minimize2, Thermometer, Wind, Droplets, Eye, X, Activity, Flame } from "lucide-react";
 import type { Lang } from "../../types";
 import L from "leaflet";
-import { T, weatherCodes } from "../../i18n/translations";
+import { weatherCodes, translationsBundle } from "../../i18n/translations";
 import {
   fetchEarthquakes, fetchNasaFires, fetchInpeFires, fetchGdacsEvents,
   fetchFloodData, fetchAirQuality, fetchWeather,
@@ -21,7 +21,7 @@ interface MapProps { lang: Lang; }
 interface Location { display_name: string; lat: string; lon: string; place_id: number; }
 
 export default function MapModule({ lang }: MapProps) {
-  const l = T[lang].map;
+  const l = translationsBundle(lang).map;
   const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef      = useRef<L.Marker | null>(null);
@@ -69,7 +69,7 @@ export default function MapModule({ lang }: MapProps) {
     clickMarkerRef.current = L.marker([lat, lng], { icon: clickIcon }).addTo(map);
     let cityName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     try {
-      const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&email=sentrix-demo%40noreply.local`);
       const geoData = await geo.json();
       cityName = geoData.address?.city || geoData.address?.town || geoData.address?.village || geoData.address?.county || geoData.display_name?.split(",")[0] || cityName;
     } catch (_) {}
@@ -166,7 +166,17 @@ export default function MapModule({ lang }: MapProps) {
       mapInstanceRef.current = map;
       loadMapLayers(map);
     }, 500);
-    return () => { activeRef.current = false; clearTimeout(timer); };
+    return () => {
+      activeRef.current = false;
+      clearTimeout(timer);
+      markerRef.current = null;
+      clickMarkerRef.current = null;
+      const m = mapInstanceRef.current;
+      if (m) {
+        try { m.remove(); } catch { /* empty */ }
+        mapInstanceRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -178,8 +188,8 @@ export default function MapModule({ lang }: MapProps) {
     setLoading(true); setResults([]); setNoResults(false);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&addressdetails=1`,
-        { headers: { "Accept-Language": lang === "pt" ? "pt-BR" : lang === "es" ? "es" : lang === "fr" ? "fr-FR" : "en" } }
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&addressdetails=1&email=sentrix-demo%40noreply.local`,
+        { headers: { "Accept-Language": lang === "pt" ? "pt-BR,pt;q=0.9" : lang === "es" ? "es,es-ES;q=0.9" : lang === "fr" ? "fr-FR,fr;q=0.9" : "en-US,en;q=0.9" } }
       );
       const data = await res.json();
       if (data.length === 0) setNoResults(true);
@@ -201,7 +211,10 @@ export default function MapModule({ lang }: MapProps) {
     handleMapClick(lat, lon);
   };
 
-  const wInfo     = weather ? (weatherCodes[weather.weathercode]?.[lang] || { label: "—", icon: "🌡️" }) : null;
+  const wc = weather ? Number(weather.weathercode) : NaN;
+  const wInfo = weather && !Number.isNaN(wc)
+    ? (weatherCodes[wc]?.[lang] ?? weatherCodes[wc]?.en ?? weatherCodes[wc]?.pt ?? { label: "—", icon: "🌡️" })
+    : null;
   const tempColor = weather ? (weather.temperature > 35 ? "#ef4444" : weather.temperature > 25 ? "#f59e0b" : weather.temperature < 5 ? "#3b82f6" : "#22c55e") : "#06b6d4";
   const quakeMagLabel    = (mag: number) => mag >= 7 ? l.extreme : mag >= 5 ? l.high : mag >= 3 ? l.moderate : l.low;
   const floodStatusLabel = (lv: FloodFeature["level"]) => lv === "critical" ? l.floodCritical : lv === "attention" ? l.floodAttention : l.floodNormal;

@@ -1,12 +1,12 @@
 import type { Lang } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 
 interface FooterProps {
   lang: Lang;
 }
 
 export default function Footer({ lang }: FooterProps) {
-  const t = T[lang];
+  const t = translationsBundle(lang);
   return (
     <footer style={{
       padding: "10px 24px", borderTop: "1px solid #1a2744",

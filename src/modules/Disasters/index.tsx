@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Lang, DisasterStatus } from "../../types";
 import { statusConfig } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 import L from "leaflet";
 
 const mapTitle: Record<Lang, string> = {
@@ -17,7 +17,7 @@ const offsets: [number, number][] = [
 ];
 
 export default function Disasters({ lang }: { lang: Lang }) {
-  const d = T[lang].disasters;
+  const d = translationsBundle(lang).disasters;
   const statusLabel = { critical: d.critical, alert: d.alert, monitoring: d.monitoring, safe: d.safe };
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -39,7 +39,7 @@ export default function Disasters({ lang }: { lang: Lang }) {
 
     const timer = setTimeout(() => {
       if (!mapRef.current || mapInstanceRef.current) return;
-      const dd = T[lang].disasters;
+      const dd = translationsBundle(lang).disasters;
       const slMap = { critical: dd.critical, alert: dd.alert, monitoring: dd.monitoring, safe: dd.safe };
       const map = L.map(mapRef.current, { center, zoom: 10, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OSM", maxZoom: 19 }).addTo(map);

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, MapPin, Users, TrendingUp, Activity, Heart, FileText, Shield, Radio, Zap, Search, ChevronRight, Loader, Navigation, Maximize2, Minimize2 } from "lucide-react";
 import type { Lang } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 import L from "leaflet";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -22,7 +22,7 @@ const mapLabels = {
 };
 
 export default function Dashboard({ lang }: DashboardProps) {
-  const t = T[lang];
+  const t = translationsBundle(lang);
   const l = mapLabels[lang];
   const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);

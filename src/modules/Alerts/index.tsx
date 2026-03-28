@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { CheckCircle, Clock, Users, MapPin, Send } from "lucide-react";
 import type { Lang, RiskLevel } from "../../types";
 import { levelConfig } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 import L from "leaflet";
 
 const alertsMapHint: Record<Lang, string> = {
@@ -19,7 +19,7 @@ const alertCoords: [number, number][] = [
 interface AlertsProps { lang: Lang; }
 
 export default function AlertSystem({ lang }: AlertsProps) {
-  const al = T[lang].alertSystem;
+  const al = translationsBundle(lang).alertSystem;
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -39,7 +39,7 @@ export default function AlertSystem({ lang }: AlertsProps) {
     });
     const timer = setTimeout(() => {
       if (!mapRef.current || mapInstanceRef.current) return;
-      const alerts = T[lang].alertSystem.alerts as { title: string; level: string; region: string; status: string }[];
+      const alerts = translationsBundle(lang).alertSystem.alerts as { title: string; level: string; region: string; status: string }[];
       const map = L.map(mapRef.current, { center: [-23.55, -46.63], zoom: 10, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OSM", maxZoom: 19 }).addTo(map);
       mapInstanceRef.current = map;

@@ -1,6 +1,6 @@
 import { Heart, Users, Shield, TrendingDown, BarChart3 } from "lucide-react";
 import type { Lang } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 
 const extra: Record<Lang, { title: string; subtitle: string; reach: string; efficacy: string; resilience: string }> = {
   pt: {
@@ -22,7 +22,7 @@ const extra: Record<Lang, { title: string; subtitle: string; reach: string; effi
 };
 
 export default function Impact({ lang }: { lang: Lang }) {
-  const t = T[lang];
+  const t = translationsBundle(lang);
   const e = extra[lang];
 
   const bars = [

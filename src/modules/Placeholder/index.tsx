@@ -1,5 +1,5 @@
 import type { Lang } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 
 interface PlaceholderProps {
   lang: Lang;
@@ -7,7 +7,7 @@ interface PlaceholderProps {
 }
 
 export default function Placeholder({ lang, moduleId }: PlaceholderProps) {
-  const t = T[lang];
+  const t = translationsBundle(lang);
 
   const labels: Record<string, Record<string, string>> = {
     pt: { map: "Mapa Inteligente", urban: "Monitoramento Urbano", impact: "Impacto Social", data: "Integração de Dados", automation: "Automação IA", tech: "Tecnologias", global: "Visão Global", reports: "Relatórios" },

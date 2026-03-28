@@ -46,7 +46,7 @@ const labels = {
 };
 
 export default function Earthquakes({ lang }: Props) {
-  const l = labels[lang];
+  const l = labels[lang] ?? labels.pt;
   const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const activeRef      = useRef(true);
@@ -102,7 +102,14 @@ export default function Earthquakes({ lang }: Props) {
       });
     }, 200);
 
-    return () => { activeRef.current = false; clearTimeout(timer); };
+    return () => {
+      activeRef.current = false;
+      clearTimeout(timer);
+      if (mapInstanceRef.current) {
+        try { mapInstanceRef.current.remove(); } catch { /* empty */ }
+        mapInstanceRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {

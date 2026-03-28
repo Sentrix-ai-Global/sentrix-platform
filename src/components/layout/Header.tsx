@@ -1,6 +1,6 @@
 import { Bell, Menu } from "lucide-react";
 import type { Lang } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 
 interface HeaderProps {
   lang: Lang;
@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 export default function Header({ lang, onMenuOpen }: HeaderProps) {
-  const t = T[lang];
+  const t = translationsBundle(lang);
 
   return (
     <header style={{

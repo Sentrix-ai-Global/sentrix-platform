@@ -27,12 +27,6 @@ export default function App() {
   const [lang, setLang]             = useState<Lang>("pt");
   const [module, setModule]         = useState("dashboard");
   const [menuOpen, setMenuOpen]     = useState(false);
-  const [mapMounted, setMapMounted] = useState(false);
-
-  useEffect(() => {
-    if (module === "map" && !mapMounted) setMapMounted(true);
-  }, [module]);
-
   useEffect(() => {
     void logPresentationEvent(module, lang);
   }, [module, lang]);
@@ -75,11 +69,7 @@ export default function App() {
           {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && module !== "floods" && module !== "airquality" && module !== "wildfires" && module !== "urban" && module !== "impact" && module !== "data" && module !== "automation" && module !== "tech" && module !== "global" && module !== "reports" && (
             <Placeholder lang={lang} moduleId={module} />
           )}
-          {mapMounted && (
-            <div style={{ display: module === "map" ? "block" : "none", position: module === "map" ? "relative" : "absolute", top: 0, left: 0, width: "100%", pointerEvents: module === "map" ? "auto" : "none", zIndex: module === "map" ? 1 : -1 }}>
-              <MapModule lang={lang} />
-            </div>
-          )}
+          {module === "map" && <MapModule key="sentrix-smart-map" lang={lang} />}
         </main>
         <Footer lang={lang} />
       </div>

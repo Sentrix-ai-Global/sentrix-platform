@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Droplets, MapPin, AlertTriangle, Loader, Maximize2, Minimize2, Activity } from "lucide-react";
 import type { Lang } from "../../types";
-import { fetchFloodData, floodColor } from "../../services/mapServices";
+import { fetchFloodData, floodColor, FLOOD_AIR_SAMPLE_POINTS, type FloodFeature } from "../../services/mapServices";
 import L from "leaflet";
 
 interface Props { lang: Lang; }
@@ -59,7 +59,7 @@ interface FloodPoint {
 }
 
 export default function Floods({ lang }: Props) {
-  const l = labels[lang];
+  const l = labels[lang] ?? labels.pt;
   const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const activeRef      = useRef(true);
@@ -108,15 +108,53 @@ export default function Floods({ lang }: Props) {
 
     const timer = setTimeout(() => {
       if (!mapRef.current || mapInstanceRef.current) return;
-      const map = L.map(mapRef.current, { center: [0, 0], zoom: 2, zoomControl: true });
+      const map = L.map(mapRef.current, { center: [-15, -55], zoom: 3, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors", maxZoom: 19,
       }).addTo(map);
       map.on("click", (e: L.LeafletMouseEvent) => addPoint(e.latlng.lat, e.latlng.lng, map));
       mapInstanceRef.current = map;
-    }, 500);
 
-    return () => { activeRef.current = false; clearTimeout(timer); };
+      void (async () => {
+        setLoading(true);
+        const batch = await Promise.all(
+          FLOOD_AIR_SAMPLE_POINTS.map(({ lat, lon }) => fetchFloodData(lat, lon).then(d => (d ? { lat, lon, d } : null)))
+        );
+        if (!activeRef.current) { setLoading(false); return; }
+        const valid = batch.filter((x): x is { lat: number; lon: number; d: FloodFeature } => x != null);
+        const next: FloodPoint[] = [];
+        const fg = L.featureGroup();
+        for (const { lat, lon, d } of valid) {
+          const point: FloodPoint = { lat, lon, discharge: d.discharge, level: d.level };
+          next.push(point);
+          const color = floodColor(d.level);
+          const icon = L.divIcon({
+            html: `<div style="width:14px;height:14px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px ${color}99"></div>`,
+            iconSize: [14, 14], iconAnchor: [7, 7], className: "",
+          });
+          const marker = L.marker([lat, lon], { icon }).addTo(map);
+          marker.on("click", () => setSelected(point));
+          fg.addLayer(marker);
+        }
+        setPoints(next);
+        if (next.length) setSelected(next[0]);
+        setLoading(false);
+        if (fg.getLayers().length) {
+          try {
+            map.fitBounds(fg.getBounds(), { padding: [36, 36], maxZoom: 5 });
+          } catch { map.setView([-15, -55], 3); }
+        }
+      })();
+    }, 450);
+
+    return () => {
+      activeRef.current = false;
+      clearTimeout(timer);
+      if (mapInstanceRef.current) {
+        try { mapInstanceRef.current.remove(); } catch { /* empty */ }
+        mapInstanceRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {

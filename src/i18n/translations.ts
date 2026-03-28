@@ -1,5 +1,10 @@
 import type { Lang } from "../types";
 
+/** Garante PT se a chave de idioma falhar (evita UI quebrada em EN/ES). */
+export function translationsBundle(lang: Lang) {
+  return T[lang] ?? T.pt;
+}
+
 export const weatherCodes: Record<number, Record<Lang, { label: string; icon: string }>> = {
   0:  { pt: { label: "Céu limpo",             icon: "☀️" }, en: { label: "Clear sky",           icon: "☀️" }, es: { label: "Cielo despejado",      icon: "☀️" }, fr: { label: "Ciel dégagé",                    icon: "☀️" } },
   1:  { pt: { label: "Principalmente limpo",  icon: "🌤️" }, en: { label: "Mainly clear",        icon: "🌤️" }, es: { label: "Principalmente claro", icon: "🌤️" }, fr: { label: "Principalement dégagé",         icon: "🌤️" } },

@@ -1,6 +1,6 @@
 import { Globe, AlertTriangle, Building2, Brain, Radio, Heart, Database, Bot, Signal, FileText, Shield, Activity, Droplets, Wind, Flame } from "lucide-react";
 import type { Lang } from "../../types";
-import { T } from "../../i18n/translations";
+import { T, translationsBundle } from "../../i18n/translations";
 
 interface SidebarProps {
   lang: Lang;
@@ -30,7 +30,7 @@ const navItems = (t: typeof T.pt) => [
 ];
 
 export default function Sidebar({ lang, setLang, module, setModule, onClose }: SidebarProps) {
-  const t = T[lang];
+  const t = translationsBundle(lang);
   const nav = navItems(t);
 
   return (
@@ -60,11 +60,11 @@ export default function Sidebar({ lang, setLang, module, setModule, onClose }: S
         })}
       </nav>
       <div style={{ padding: "10px 8px", borderTop: "1px solid #1a2744" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "#0a1628", borderRadius: 8, border: "1px solid #1a2744" }}>
+        <div style={{ display: "flex", flexDirection: "row", flexWrap: "nowrap", gap: 4, padding: 4, background: "#0a1628", borderRadius: 8, border: "1px solid #1a2744", overflowX: "auto" }}>
           {(["pt", "en", "es", "fr"] as Lang[]).map(l => (
-            <button key={l} onClick={() => setLang(l)}
-              title={l === "fr" ? "Français (Europe)" : l === "es" ? "Español (LatAm)" : l === "pt" ? "Português" : "English"}
-              style={{ flex: "1 1 40%", minWidth: 44, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 900, textTransform: "uppercase", background: lang === l ? "rgba(249,115,22,0.2)" : "transparent", color: lang === l ? "#f97316" : "#2a3a54", transition: "all 0.15s" }}
+            <button key={l} type="button" onClick={() => setLang(l)}
+              title={l === "fr" ? "Français" : l === "es" ? "Español" : l === "pt" ? "Português" : "English"}
+              style={{ flex: "1 0 auto", minWidth: 44, padding: "8px 6px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 900, textTransform: "uppercase", background: lang === l ? "rgba(249,115,22,0.25)" : "transparent", color: lang === l ? "#f97316" : "#94a3b8", transition: "all 0.15s" }}
             >{l}</button>
           ))}
         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Wind, MapPin, AlertTriangle, Loader, Maximize2, Minimize2, Activity, Eye } from "lucide-react";
 import type { Lang } from "../../types";
-import { fetchAirQuality, airQualityColor } from "../../services/mapServices";
+import { fetchAirQuality, airQualityColor, FLOOD_AIR_SAMPLE_POINTS, type AirQualityFeature as AQF } from "../../services/mapServices";
 import L from "leaflet";
 
 interface Props { lang: Lang; }
@@ -59,7 +59,7 @@ interface AirPoint {
 }
 
 export default function AirQuality({ lang }: Props) {
-  const l = labels[lang];
+  const l = labels[lang] ?? labels.pt;
   const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const activeRef      = useRef(true);
@@ -104,14 +104,52 @@ export default function AirQuality({ lang }: Props) {
     });
     const timer = setTimeout(() => {
       if (!mapRef.current || mapInstanceRef.current) return;
-      const map = L.map(mapRef.current, { center: [0, 0], zoom: 2, zoomControl: true });
+      const map = L.map(mapRef.current, { center: [-15, -55], zoom: 3, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors", maxZoom: 19,
       }).addTo(map);
       map.on("click", (e: L.LeafletMouseEvent) => addPoint(e.latlng.lat, e.latlng.lng, map));
       mapInstanceRef.current = map;
-    }, 500);
-    return () => { activeRef.current = false; clearTimeout(timer); };
+
+      void (async () => {
+        setLoading(true);
+        const batch = await Promise.all(
+          FLOOD_AIR_SAMPLE_POINTS.map(({ lat, lon }) => fetchAirQuality(lat, lon).then(d => (d ? { lat, lon, d } : null)))
+        );
+        if (!activeRef.current) { setLoading(false); return; }
+        const valid = batch.filter((x): x is { lat: number; lon: number; d: AQF } => x != null);
+        const next: AirPoint[] = [];
+        const fg = L.featureGroup();
+        for (const { lat, lon, d } of valid) {
+          const point: AirPoint = { lat, lon, aqi: d.aqi, pm25: d.pm25, pm10: d.pm10, level: d.level };
+          next.push(point);
+          const color = airQualityColor(d.level);
+          const icon = L.divIcon({
+            html: `<div style="width:14px;height:14px;background:${color};border:2px solid #fff;border-radius:4px;box-shadow:0 0 8px ${color}99;transform:rotate(45deg)"></div>`,
+            iconSize: [14, 14], iconAnchor: [7, 7], className: "",
+          });
+          const marker = L.marker([lat, lon], { icon }).addTo(map);
+          marker.on("click", () => setSelected(point));
+          fg.addLayer(marker);
+        }
+        setPoints(next);
+        if (next.length) setSelected(next[0]);
+        setLoading(false);
+        if (fg.getLayers().length) {
+          try {
+            map.fitBounds(fg.getBounds(), { padding: [36, 36], maxZoom: 5 });
+          } catch { map.setView([-15, -55], 3); }
+        }
+      })();
+    }, 450);
+    return () => {
+      activeRef.current = false;
+      clearTimeout(timer);
+      if (mapInstanceRef.current) {
+        try { mapInstanceRef.current.remove(); } catch { /* empty */ }
+        mapInstanceRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {

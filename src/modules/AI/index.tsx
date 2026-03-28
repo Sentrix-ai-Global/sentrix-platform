@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Brain, Target, Bell, Clock, MapPin, ChevronRight, Cpu } from "lucide-react";
 import type { Lang, RiskLevel } from "../../types";
 import { levelConfig } from "../../types";
-import { T } from "../../i18n/translations";
+import { translationsBundle } from "../../i18n/translations";
 import L from "leaflet";
 
 const aiMapHint: Record<Lang, string> = {
@@ -19,7 +19,7 @@ const aiCoords: [number, number][] = [
 interface AIProps { lang: Lang; }
 
 export default function AIPredictive({ lang }: AIProps) {
-  const ai = T[lang].ai;
+  const ai = translationsBundle(lang).ai;
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -39,7 +39,7 @@ export default function AIPredictive({ lang }: AIProps) {
     });
     const timer = setTimeout(() => {
       if (!mapRef.current || mapInstanceRef.current) return;
-      const a = T[lang].ai;
+      const a = translationsBundle(lang).ai;
       const map = L.map(mapRef.current, { center: [-23.55, -46.63], zoom: 10, zoomControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OSM", maxZoom: 19 }).addTo(map);
       mapInstanceRef.current = map;
