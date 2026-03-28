@@ -40,6 +40,17 @@ const labels = {
     analyzed: "PUNTOS ANALIZADOS", loading: "Cargando...",
     status: "Estado",
   },
+  fr: {
+    title: "QUALITÉ DE L’AIR EN TEMPS RÉEL", subtitle: "API Open-Meteo Air Quality • Données mondiales en direct",
+    clickMap: "Cliquez sur la carte pour analyser la qualité de l’air dans cette zone",
+    expand: "PLEIN ÉCRAN", collapse: "RÉDUIRE", legend: "LÉGENDE",
+    aqi: "Indice AQI", pm25: "PM2,5 (µg/m³)", pm10: "PM10 (µg/m³)",
+    good: "Bonne", moderate: "Modérée", poor: "Mauvaise", hazardous: "Dangereuse",
+    lat: "Lat", lon: "Lon", airTitle: "QUALITÉ DE L’AIR",
+    total: "Total analysé", goodCount: "Bonne", poorCount: "Mauvaise / dangereuse",
+    analyzed: "POINTS ANALYSÉS", loading: "Chargement…",
+    status: "Statut",
+  },
 };
 
 interface AirPoint {

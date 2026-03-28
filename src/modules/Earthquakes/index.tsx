@@ -34,6 +34,15 @@ const labels = {
     recent: "EVENTOS RECIENTES", km: "km prof.", expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR",
     legend: "LEYENDA",
   },
+  fr: {
+    title: "SÉISMES EN TEMPS RÉEL", subtitle: "Données USGS • 7 derniers jours • Monde",
+    loading: "Chargement USGS…", noData: "Aucun séisme enregistré.",
+    mag: "Magnitude", depth: "Profondeur", location: "Lieu", time: "Heure",
+    total: "Événements totaux", strong: "Forts (M5+)", major: "Majeurs (M7+)",
+    low: "Faible", moderate: "Modéré", high: "Élevé", extreme: "Extrême",
+    recent: "ÉVÉNEMENTS RÉCENTS", km: "km prof.", expand: "PLEIN ÉCRAN", collapse: "RÉDUIRE",
+    legend: "LÉGENDE",
+  },
 };
 
 export default function Earthquakes({ lang }: Props) {

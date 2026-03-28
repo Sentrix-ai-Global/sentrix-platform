@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Flame, MapPin, AlertTriangle, Loader, Maximize2, Minimize2, Activity, Thermometer } from "lucide-react";
+import { Flame, AlertTriangle, Loader, Maximize2, Minimize2, Activity } from "lucide-react";
 import type { Lang } from "../../types";
 import { fetchNasaFires, fetchInpeFires } from "../../services/mapServices";
 import L from "leaflet";
@@ -42,6 +42,18 @@ const labels = {
     municipality: "Municipio", state: "Estado", biome: "Bioma",
     lat: "Lat", lon: "Lon", fireTitle: "FOCO DE INCENDIO",
     nasaLoading: "Cargando NASA...", inpeLoading: "Cargando INPE...",
+  },
+  fr: {
+    title: "FEUX DE FORÊT ET BRÛLIS EN TEMPS RÉEL",
+    subtitle: "NASA FIRMS VIIRS • INPE BDQueimadas • Données mondiales en direct",
+    expand: "PLEIN ÉCRAN", collapse: "RÉDUIRE", legend: "LÉGENDE",
+    nasaFire: "🔴 NASA FIRMS", inpeFire: "🟡 INPE Brésil",
+    total: "Total foyers", nasa: "NASA FIRMS", inpe: "INPE Brésil",
+    analyzed: "FOYEURS DÉTECTÉS", loading: "Chargement…",
+    brightness: "Température (K)", confidence: "Confiance",
+    municipality: "Commune", state: "État", biome: "Biome",
+    lat: "Lat", lon: "Lon", fireTitle: "FOYER D’INCENDIE",
+    nasaLoading: "Chargement NASA…", inpeLoading: "Chargement INPE…",
   },
 };
 

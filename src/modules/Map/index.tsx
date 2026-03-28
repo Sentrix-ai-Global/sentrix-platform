@@ -179,7 +179,7 @@ export default function MapModule({ lang }: MapProps) {
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&addressdetails=1`,
-        { headers: { "Accept-Language": lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en" } }
+        { headers: { "Accept-Language": lang === "pt" ? "pt-BR" : lang === "es" ? "es" : lang === "fr" ? "fr-FR" : "en" } }
       );
       const data = await res.json();
       if (data.length === 0) setNoResults(true);

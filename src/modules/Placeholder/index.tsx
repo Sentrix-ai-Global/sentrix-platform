@@ -13,6 +13,7 @@ export default function Placeholder({ lang, moduleId }: PlaceholderProps) {
     pt: { map: "Mapa Inteligente", urban: "Monitoramento Urbano", impact: "Impacto Social", data: "Integração de Dados", automation: "Automação IA", tech: "Tecnologias", global: "Visão Global", reports: "Relatórios" },
     en: { map: "Smart Map", urban: "Urban Monitoring", impact: "Social Impact", data: "Data Integration", automation: "AI Automation", tech: "Technologies", global: "Global Vision", reports: "Reports" },
     es: { map: "Mapa Inteligente", urban: "Monitoreo Urbano", impact: "Impacto Social", data: "Integración de Datos", automation: "Automatización IA", tech: "Tecnologías", global: "Visión Global", reports: "Informes" },
+    fr: { map: "Carte intelligente", urban: "Surveillance urbaine", impact: "Impact social", data: "Intégration des données", automation: "Automatisation IA", tech: "Technologies", global: "Vision mondiale", reports: "Rapports" },
   };
 
   const label = labels[lang]?.[moduleId] ?? moduleId;

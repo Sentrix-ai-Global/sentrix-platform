@@ -60,10 +60,11 @@ export default function Sidebar({ lang, setLang, module, setModule, onClose }: S
         })}
       </nav>
       <div style={{ padding: "10px 8px", borderTop: "1px solid #1a2744" }}>
-        <div style={{ display: "flex", gap: 4, padding: 4, background: "#0a1628", borderRadius: 8, border: "1px solid #1a2744" }}>
-          {(["pt", "en", "es"] as Lang[]).map(l => (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "#0a1628", borderRadius: 8, border: "1px solid #1a2744" }}>
+          {(["pt", "en", "es", "fr"] as Lang[]).map(l => (
             <button key={l} onClick={() => setLang(l)}
-              style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 900, textTransform: "uppercase", background: lang === l ? "rgba(249,115,22,0.2)" : "transparent", color: lang === l ? "#f97316" : "#2a3a54", transition: "all 0.15s" }}
+              title={l === "fr" ? "Français (Europe)" : l === "es" ? "Español (LatAm)" : l === "pt" ? "Português" : "English"}
+              style={{ flex: "1 1 40%", minWidth: 44, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 900, textTransform: "uppercase", background: lang === l ? "rgba(249,115,22,0.2)" : "transparent", color: lang === l ? "#f97316" : "#2a3a54", transition: "all 0.15s" }}
             >{l}</button>
           ))}
         </div>

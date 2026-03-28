@@ -14,6 +14,7 @@ import AirQuality   from "./modules/AirQuality";
 import Wildfires    from "./modules/Wildfires";
 import Placeholder  from "./modules/Placeholder";
 import type { Lang } from "./types";
+import { logPresentationEvent } from "./services/presentationFeedback";
 
 export default function App() {
   const [lang, setLang]             = useState<Lang>("pt");
@@ -24,6 +25,10 @@ export default function App() {
   useEffect(() => {
     if (module === "map" && !mapMounted) setMapMounted(true);
   }, [module]);
+
+  useEffect(() => {
+    void logPresentationEvent(module, lang);
+  }, [module, lang]);
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", background: "#050d1f", overflow: "hidden" }}>

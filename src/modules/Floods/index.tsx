@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Droplets, MapPin, Clock, AlertTriangle, Loader, Maximize2, Minimize2, Activity } from "lucide-react";
+import { Droplets, MapPin, AlertTriangle, Loader, Maximize2, Minimize2, Activity } from "lucide-react";
 import type { Lang } from "../../types";
 import { fetchFloodData, floodColor } from "../../services/mapServices";
 import L from "leaflet";
@@ -39,6 +39,17 @@ const labels = {
     noData: "Clic en el mapa para ver datos de inundación.",
     river: "RÍO / CUENCA", floodTitle: "INUNDACIÓN — OPEN-METEO",
     total: "Total analizado", atention: "En atención", crit: "Críticos",
+  },
+  fr: {
+    title: "INONDATIONS EN TEMPS RÉEL", subtitle: "API Open-Meteo Flood • Données mondiales en direct",
+    loading: "Chargement…", clickMap: "Cliquez sur la carte pour analyser les crues dans cette zone",
+    expand: "PLEIN ÉCRAN", collapse: "RÉDUIRE", legend: "LÉGENDE",
+    discharge: "Débit (m³/s)", status: "État du fleuve",
+    normal: "Normal", attention: "Attention", critical: "Critique",
+    lat: "Lat", lon: "Lon", analyzed: "POINTS ANALYSÉS",
+    noData: "Cliquez sur la carte pour voir les données.",
+    river: "FLEUVE / BASSIN", floodTitle: "CRUE — OPEN-METEO",
+    total: "Total analysé", atention: "En vigilance", crit: "Critiques",
   },
 };
 

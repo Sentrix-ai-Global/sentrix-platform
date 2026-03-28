@@ -18,6 +18,7 @@ const mapLabels = {
   pt: { placeholder: "Buscar localização no mapa...", searching: "Buscando...", search: "BUSCAR", expand: "TELA CHEIA", collapse: "MINIMIZAR" },
   en: { placeholder: "Search location on map...", searching: "Searching...", search: "SEARCH", expand: "FULL SCREEN", collapse: "MINIMIZE" },
   es: { placeholder: "Buscar ubicación en el mapa...", searching: "Buscando...", search: "BUSCAR", expand: "PANTALLA COMPLETA", collapse: "MINIMIZAR" },
+  fr: { placeholder: "Rechercher un lieu sur la carte…", searching: "Recherche…", search: "RECHERCHER", expand: "PLEIN ÉCRAN", collapse: "RÉDUIRE" },
 };
 
 export default function Dashboard({ lang }: DashboardProps) {
@@ -65,7 +66,7 @@ export default function Dashboard({ lang }: DashboardProps) {
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6`,
-        { headers: { "Accept-Language": lang === "pt" ? "pt-BR" : lang === "es" ? "es" : "en" } }
+        { headers: { "Accept-Language": lang === "pt" ? "pt-BR" : lang === "es" ? "es" : lang === "fr" ? "fr-FR" : "en" } }
       );
       const data = await res.json();
       setResults(data);
