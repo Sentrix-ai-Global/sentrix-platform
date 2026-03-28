@@ -12,6 +12,13 @@ import Earthquakes  from "./modules/Earthquakes";
 import Floods       from "./modules/Floods";
 import AirQuality   from "./modules/AirQuality";
 import Wildfires    from "./modules/Wildfires";
+import Urban        from "./modules/Urban";
+import Impact       from "./modules/Impact";
+import DataHub      from "./modules/DataHub";
+import Automation   from "./modules/Automation";
+import Tech         from "./modules/Tech";
+import GlobalVision from "./modules/GlobalVision";
+import Reports      from "./modules/Reports";
 import Placeholder  from "./modules/Placeholder";
 import type { Lang } from "./types";
 import { logPresentationEvent } from "./services/presentationFeedback";
@@ -58,7 +65,14 @@ export default function App() {
           {module === "floods"      && <Floods       lang={lang} />}
           {module === "airquality"  && <AirQuality   lang={lang} />}
           {module === "wildfires"   && <Wildfires    lang={lang} />}
-          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && module !== "floods" && module !== "airquality" && module !== "wildfires" && (
+          {module === "urban"       && <Urban        lang={lang} />}
+          {module === "impact"      && <Impact       lang={lang} />}
+          {module === "data"        && <DataHub      lang={lang} />}
+          {module === "automation"  && <Automation   lang={lang} />}
+          {module === "tech"        && <Tech         lang={lang} />}
+          {module === "global"      && <GlobalVision lang={lang} />}
+          {module === "reports"     && <Reports      lang={lang} />}
+          {module !== "dashboard" && module !== "ai" && module !== "alerts" && module !== "disasters" && module !== "map" && module !== "earthquakes" && module !== "floods" && module !== "airquality" && module !== "wildfires" && module !== "urban" && module !== "impact" && module !== "data" && module !== "automation" && module !== "tech" && module !== "global" && module !== "reports" && (
             <Placeholder lang={lang} moduleId={module} />
           )}
           {mapMounted && (
